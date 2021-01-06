@@ -52,6 +52,12 @@
             <version>1.7.0</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>1.7.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -73,7 +79,7 @@
                 <version>3.0.0-M4</version>
                 <configuration>
                     <argLine>--enable-preview</argLine>
-                    <compilerArgs>--enable-preview</compilerArgs>
+                    <wcompilerArgs>--enable-preview</wcompilerArgs>
                 </configuration>
             </plugin>
         </plugins>

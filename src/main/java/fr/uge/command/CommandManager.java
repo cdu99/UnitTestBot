@@ -10,6 +10,7 @@ public class CommandManager {
 
     public CommandManager() {
         addCommand(new TestClassCommand());
+        addCommand(new TestCommand());
     }
 
     private void addCommand(Command c) {

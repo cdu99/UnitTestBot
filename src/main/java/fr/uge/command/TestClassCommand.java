@@ -1,34 +1,43 @@
 package fr.uge.command;
 
-
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class TestClassCommand extends ListenerAdapter {
+public class TestClassCommand implements Command {
+
     @Override
-    public void onMessageReceived(MessageReceivedEvent event) {
-        Message msg = event.getMessage();
-        if (msg.getContentRaw().equals("!testclass")) {
-            List<Message.Attachment> attachments = event.getMessage().getAttachments();
-            MessageChannel channel = event.getChannel();
-            if (attachments.isEmpty()) {
-                channel.sendMessage("Please attach the test file !!")
+    public void execute(MessageReceivedEvent event) {
+        List<Message.Attachment> attachments = event.getMessage().getAttachments();
+        MessageChannel channel = event.getChannel();
+
+        if (!attachments.isEmpty()) {
+            String fileName = attachments.get(0).getFileName();
+
+            if (!fileName.endsWith(".class")) {
+                channel.sendMessage("The test must be a .class file !!")
                         .queue();
                 return;
             }
 
             CompletableFuture<File> attachment = attachments.get(0)
-                    .downloadToFile(attachments.get(0).getFileName());
+                    .downloadToFile("src/main/resources/" + fileName);
             attachment.exceptionally(error -> {
                 error.printStackTrace();
                 return null;
             });
+        } else {
+            channel.sendMessage("Please attach a test file !!")
+                    .queue();
         }
+    }
+
+    @Override
+    public String getCommand() {
+        return "!testclass";
     }
 }

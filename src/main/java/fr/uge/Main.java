@@ -1,4 +1,4 @@
-package fr.uge.main;
+package fr.uge;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -10,6 +10,7 @@ public class Main {
     public static void main(String[] args) throws LoginException {
         JDA builder = JDABuilder.createDefault("Nzk1NjA4NDAyODAwOTM0OTgz.X_L2EA.XWr5S82moiVmdrF-PvZDBhMX-NI")
                 .setActivity(Activity.playing("WIP"))
+                .addEventListeners(new Listener())
                 .build();
     }
 }

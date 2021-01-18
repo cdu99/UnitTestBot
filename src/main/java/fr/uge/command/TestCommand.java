@@ -8,8 +8,6 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static fr.uge.test.Testing.LaunchTheFckingTest;
-
 public class TestCommand implements Command {
 
     @Override

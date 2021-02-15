@@ -17,7 +17,6 @@ public class TestClassCommand implements Command {
 
         if (!attachments.isEmpty()) {
             String fileName = attachments.get(0).getFileName();
-
             if (!fileName.endsWith(".class")) {
                 channel.sendMessage("The test must be a .class file !!")
                         .queue();
@@ -25,7 +24,7 @@ public class TestClassCommand implements Command {
             }
 
             CompletableFuture<File> attachment = attachments.get(0)
-                    .downloadToFile("src/main/resources/" + fileName);
+                    .downloadToFile("src/main/java/fr/uge/test/" + fileName);
             attachment.exceptionally(error -> {
                 error.printStackTrace();
                 return null;

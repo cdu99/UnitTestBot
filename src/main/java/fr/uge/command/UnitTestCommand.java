@@ -8,7 +8,7 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class TestClassCommand implements Command {
+public class UnitTestCommand implements Command {
 
     @Override
     public void execute(MessageReceivedEvent event) {
@@ -17,15 +17,13 @@ public class TestClassCommand implements Command {
 
         if (!attachments.isEmpty()) {
             String fileName = attachments.get(0).getFileName();
-
             if (!fileName.endsWith(".class")) {
                 channel.sendMessage("The test must be a .class file !!")
                         .queue();
                 return;
             }
-
             CompletableFuture<File> attachment = attachments.get(0)
-                    .downloadToFile("src/main/resources/" + fileName);
+                    .downloadToFile("src/main/java/fr/uge/test/" + fileName);
             attachment.exceptionally(error -> {
                 error.printStackTrace();
                 return null;
@@ -38,6 +36,6 @@ public class TestClassCommand implements Command {
 
     @Override
     public String getCommand() {
-        return "!testclass";
+        return "!unittest";
     }
 }

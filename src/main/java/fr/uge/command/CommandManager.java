@@ -9,7 +9,7 @@ public class CommandManager {
     private final Map<String, Command> commands = new HashMap<>();
 
     public CommandManager() {
-        addCommand(new TestClassCommand());
+        addCommand(new UnitTestCommand());
         addCommand(new TestCommand());
     }
 

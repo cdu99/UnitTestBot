@@ -8,8 +8,6 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static fr.uge.test.Testing.LaunchTheFckingTest;
-
 public class TestCommand implements Command {
 
     @Override
@@ -19,20 +17,17 @@ public class TestCommand implements Command {
 
         if (!attachments.isEmpty()) {
             String fileName = attachments.get(0).getFileName();
-
             if (!fileName.endsWith(".java")) {
                 channel.sendMessage("This must be a java file !!")
                         .queue();
                 return;
             }
-
             CompletableFuture<File> attachment = attachments.get(0)
-                    .downloadToFile("src/main/resources/" + fileName);
+                    .downloadToFile("src/main/java/fr/uge/test/" + fileName);
             attachment.exceptionally(error -> {
                 error.printStackTrace();
                 return null;
             });
-
         } else {
             channel.sendMessage("Please attach a java file !!")
                     .queue();

@@ -1,6 +1,5 @@
 package fr.uge;
 
-import fr.uge.test.TestRunner;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -14,8 +13,5 @@ public class Main {
                 .setActivity(Activity.playing("WIP"))
                 .addEventListeners(new Listener())
                 .build();
-
-        var tr = new TestRunner();
-        tr.run("PleaseWorkTest");
     }
 }

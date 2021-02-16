@@ -8,7 +8,7 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class TestClassCommand implements Command {
+public class UnitTestCommand implements Command {
 
     @Override
     public void execute(MessageReceivedEvent event) {
@@ -36,6 +36,6 @@ public class TestClassCommand implements Command {
 
     @Override
     public String getCommand() {
-        return "!testclass";
+        return "!unittest";
     }
 }

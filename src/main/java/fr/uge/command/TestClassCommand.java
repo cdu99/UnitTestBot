@@ -22,7 +22,6 @@ public class TestClassCommand implements Command {
                         .queue();
                 return;
             }
-
             CompletableFuture<File> attachment = attachments.get(0)
                     .downloadToFile("src/main/java/fr/uge/test/" + fileName);
             attachment.exceptionally(error -> {

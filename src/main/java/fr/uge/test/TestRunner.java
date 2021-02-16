@@ -1,6 +1,5 @@
 package fr.uge.test;
 
-import fr.uge.Main;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
@@ -13,38 +12,32 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
+import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 public class TestRunner {
     private final ClassLoader classLoader;
 
-    public TestRunner() throws MalformedURLException, ClassNotFoundException {
-        File file = new File("C:\\Users\\calvi\\IdeaProjects\\du-pietrac\\src\\main\\java");
+    public TestRunner() throws MalformedURLException {
+        File file = new File("src\\main\\java\\fr\\uge\\test");
         URL classUrl = file.toURI().toURL();
-        URL[] urls = new URL[]{classUrl};
-        ClassLoader ucl = new URLClassLoader(urls, getClass().getClassLoader());
-        ucl.loadClass("fr.uge.test.MainTest");
-
-        this.classLoader = ucl;
+        URL[] classUrls = new URL[]{classUrl};
+        ClassLoader classLoader = new URLClassLoader(classUrls, getClass().getClassLoader());
+        this.classLoader = classLoader;
     }
 
-    public int getAsInt() {
+    public void run(String classFileName) throws ClassNotFoundException {
         var oldContext = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
         try {
-            return runTests();
+            runTests(classFileName);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContext);
         }
     }
 
-    private static int runTests() {
+    private void runTests(String classFileName) throws ClassNotFoundException {
         LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request();
-
-        // Select from...
-        builder.selectors(selectPackage("fr.uge.test"));
-
-        // Fine-tune configuration...
+        builder.selectors(selectClass(classLoader.loadClass(classFileName)));
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
 
         Launcher launcher = LauncherFactory.create();
@@ -54,16 +47,15 @@ public class TestRunner {
         launcher.execute(launcherDiscoveryRequest);
 
         var summary = summaryGeneratingListener.getSummary();
-        var success = summary.getTestsFailedCount() == 0 && summary.getTestsAbortedCount() == 0 &&
-                summary.getContainersFailedCount() == 0 && summary.getContainersAbortedCount() == 0;
-        if (success) {
-            var succeeded = summary.getTestsSucceededCount();
-            System.out.printf("success / tests found : " + summary.getTestsFoundCount());
-        } else {
+        if (summary.getTotalFailureCount() != 0) {
             var writer = new PrintWriter(System.err);
             summary.printTo(writer);
             summary.printFailuresTo(writer);
         }
-        return success? 0: 1;
+        if (summary.getTestsFoundCount() == 0) {
+            System.out.println("No tests found");
+        } else {
+            System.out.println(summary.getTestsFoundCount() + " tests found");
+        }
     }
 }

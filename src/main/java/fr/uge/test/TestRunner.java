@@ -17,11 +17,12 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 public class TestRunner {
     private final ClassLoader classLoader;
 
-    public TestRunner() throws MalformedURLException {
+    public TestRunner(String javaCompiledFileToLoad) throws MalformedURLException, ClassNotFoundException {
         File file = new File("src\\main\\java\\fr\\uge\\test");
         URL classUrl = file.toURI().toURL();
         URL[] classUrls = new URL[]{classUrl};
         ClassLoader classLoader = new URLClassLoader(classUrls, getClass().getClassLoader());
+        classLoader.loadClass(javaCompiledFileToLoad);
         this.classLoader = classLoader;
     }
 

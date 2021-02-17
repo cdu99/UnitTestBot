@@ -29,7 +29,7 @@ public class TestCommand implements Command {
                     .downloadToFile("src/main/java/fr/uge/test/" + fileName);
             try {
                 JavaFileTesting.compileAndTest(attachment.get());
-            } catch (InterruptedException | ExecutionException | IOException e) {
+            } catch (InterruptedException | ExecutionException | IOException | ClassNotFoundException e) {
                 throw new AssertionError(e);
             }
             attachment.exceptionally(error -> {

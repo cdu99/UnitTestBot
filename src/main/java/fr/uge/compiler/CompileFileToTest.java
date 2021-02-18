@@ -26,7 +26,7 @@ public class CompileFileToTest {
             System.out.println("File compiled");
         } else {
             for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-                // Discord --> erreur de compilation
+                // Discord (MP ou msg channel?) --> erreur de compilation
                 System.out.format("Error on line %d in %s%n", diagnostic.getLineNumber(), diagnostic.getSource().toUri());
             }
         }

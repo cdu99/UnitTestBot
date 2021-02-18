@@ -1,5 +1,6 @@
 package fr.uge.test;
 
+import fr.uge.database.TestResult;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -12,6 +13,7 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.List;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
@@ -27,17 +29,17 @@ public class TestRunner {
         this.classLoader = classLoader;
     }
 
-    public void run(String classFileName, String studentId) throws ClassNotFoundException {
+    public List<TestResult> run(String classFileName, String studentId) throws ClassNotFoundException {
         var oldContext = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
         try {
-            runTests(classFileName, studentId);
+            return runTests(classFileName, studentId);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContext);
         }
     }
 
-    private void runTests(String classFileName, String studentId) throws ClassNotFoundException {
+    private List<TestResult> runTests(String classFileName, String studentId) throws ClassNotFoundException {
         LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request();
         builder.selectors(selectClass(classLoader.loadClass(classFileName)));
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
@@ -49,6 +51,7 @@ public class TestRunner {
         launcher.registerTestExecutionListeners(unitTestListener);
         launcher.execute(launcherDiscoveryRequest);
 
+        return unitTestListener.getTestResults();
 //        var summary = summaryGeneratingListener.getSummary();
 //        if (summary.getTotalFailureCount() != 0) {
 //            var writer = new PrintWriter(System.err);

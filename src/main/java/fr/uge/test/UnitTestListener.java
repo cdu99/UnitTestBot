@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class UnitTestListener implements TestExecutionListener {
-    private Database database;
     private TestResult currentTestResult;
     private List<TestResult> testResults;
     private final String studentId;
@@ -22,15 +21,19 @@ public class UnitTestListener implements TestExecutionListener {
         this.studentId = studentId;
     }
 
+    public List<TestResult> getTestResults() {
+        return testResults;
+    }
+
     public void testPlanExecutionStarted(TestPlan testPlan) {
-        this.database = new Database();
         this.currentTestResult = new TestResult();
         this.testResults = new ArrayList<>();
     }
 
     public void testPlanExecutionFinished(TestPlan testPlan) {
-        testResults.forEach(testResult -> database.insertTestResultBean(testResult));
+
         // Discord mp le student ses resultats
+        // OU PAS??
     }
 
 //    public void dynamicTestRegistered(TestIdentifier testIdentifier) {

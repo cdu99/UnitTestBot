@@ -1,5 +1,6 @@
 package fr.uge.test;
 
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
@@ -26,38 +27,38 @@ public class TestRunner {
         this.classLoader = classLoader;
     }
 
-    public void run(String classFileName) throws ClassNotFoundException {
+    public void run(String classFileName, String studentId) throws ClassNotFoundException {
         var oldContext = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
         try {
-            runTests(classFileName);
+            runTests(classFileName, studentId);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContext);
         }
     }
 
-    private void runTests(String classFileName) throws ClassNotFoundException {
+    private void runTests(String classFileName, String studentId) throws ClassNotFoundException {
         LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request();
         builder.selectors(selectClass(classLoader.loadClass(classFileName)));
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
 
         Launcher launcher = LauncherFactory.create();
         LauncherDiscoveryRequest launcherDiscoveryRequest = builder.build();
-        var summaryGeneratingListener = new SummaryGeneratingListener();
-        var unitTestListener = new UnitTestListener();
-        launcher.registerTestExecutionListeners(summaryGeneratingListener, unitTestListener);
+//        var summaryGeneratingListener = new SummaryGeneratingListener();
+        var unitTestListener = new UnitTestListener(studentId);
+        launcher.registerTestExecutionListeners(unitTestListener);
         launcher.execute(launcherDiscoveryRequest);
 
-        var summary = summaryGeneratingListener.getSummary();
-        if (summary.getTotalFailureCount() != 0) {
-            var writer = new PrintWriter(System.err);
-            summary.printTo(writer);
-            summary.printFailuresTo(writer);
-        }
-        if (summary.getTestsFoundCount() == 0) {
-            System.out.println("No tests found");
-        } else {
-            System.out.println(summary.getTestsFoundCount() + " tests found");
-        }
+//        var summary = summaryGeneratingListener.getSummary();
+//        if (summary.getTotalFailureCount() != 0) {
+//            var writer = new PrintWriter(System.err);
+//            summary.printTo(writer);
+//            summary.printFailuresTo(writer);
+//        }
+//        if (summary.getTestsFoundCount() == 0) {
+//            System.out.println("No tests found");
+//        } else {
+//            System.out.println(summary.getTestsFoundCount() + " tests found");
+//        }
     }
 }

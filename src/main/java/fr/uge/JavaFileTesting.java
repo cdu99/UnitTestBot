@@ -1,8 +1,5 @@
 package fr.uge;
 
-import fr.uge.command.Command;
-import fr.uge.command.TestCommand;
-import fr.uge.command.UnitTestCommand;
 import fr.uge.compiler.CompileFileToTest;
 import fr.uge.database.TestResult;
 import fr.uge.test.TestRunner;
@@ -23,8 +20,9 @@ public class JavaFileTesting {
         CompileFileToTest.compile(file);
 
         try {
+            String studentId = event.getAuthor().getAsTag();
             TestRunner testRunner = new TestRunner(fileName);
-            testRunner.run(expectedTestFileName);
+            testRunner.run(expectedTestFileName, studentId);
         } catch (ClassNotFoundException e) {
             event.getChannel().sendMessage("No unit test found for this class").queue();
             throw new AssertionError(e);

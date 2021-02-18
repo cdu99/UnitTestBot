@@ -8,15 +8,15 @@ public class Database {
     private final Jdbi jdbi;
 
     public Database() {
-        this.jdbi = Jdbi.create(IN_MEMORY_DB);
+        this.jdbi = Jdbi.create(UNIT_TEST_DATABASE);
     }
 
-    public void createTables() {
+    public void createTable() {
         jdbi.useHandle(handle -> {
             handle.execute("drop table if exists test_result;");
-            handle.execute("create table test_result(student string," +
-                    "question string," +
-                    "test string," +
+            handle.execute("create table test_result(student String," +
+                    "question String," +
+                    "test String," +
                     "result boolean);");
         });
     }
@@ -24,5 +24,13 @@ public class Database {
     public void insertTestResult(String student, String question, String testName, boolean result) {
         jdbi.useHandle(handle -> handle.execute("insert into test_result values(?, ?, ?, ?)"
                 , student, question, testName, result));
+    }
+
+    public void insertTestResultBean(TestResult testResult) {
+        jdbi.useHandle(handle -> handle.createUpdate("insert into test_result " +
+                "(student, question, test, result) values " +
+                "(:student, :question, :test, :result)")
+                .bindBean(testResult)
+                .execute());
     }
 }

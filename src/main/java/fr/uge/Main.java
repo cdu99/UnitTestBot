@@ -1,6 +1,7 @@
 package fr.uge;
 
 import fr.uge.database.Database;
+import fr.uge.database.TestResult;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -17,9 +18,18 @@ public class Main {
 //                .addEventListeners(new Listener())
 //                .build();
 
-//        Jdbi jdbi = Jdbi.create("jdbc:sqlite::memory:");
         var database = new Database();
-        database.createTables();
-        database.testInstert();
+        database.createTable();
+        var tr = new TestResult();
+        tr.setStudent("EREN");
+        tr.setResult(true);
+        var tr2 = new TestResult();
+        tr2.setStudent("MIKASA");
+        database.insertTestResultBean(tr);
+        var dbd = new Database();
+
+        dbd.insertTestResultBean(tr2);
+
+
     }
 }

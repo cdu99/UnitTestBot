@@ -1,13 +1,20 @@
 package fr.uge;
 
+import fr.uge.command.Command;
+import fr.uge.command.TestCommand;
+import fr.uge.command.UnitTestCommand;
 import fr.uge.compiler.CompileFileToTest;
+import fr.uge.database.TestResult;
 import fr.uge.test.TestRunner;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JavaFileTesting {
+    private List<TestResult> testResults = new ArrayList<>();
 
     public static void compileAndTest(File file, MessageReceivedEvent event) throws IOException {
         String fileName = file.getName().split("\\.")[0];

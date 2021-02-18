@@ -44,7 +44,8 @@ public class TestRunner {
         Launcher launcher = LauncherFactory.create();
         LauncherDiscoveryRequest launcherDiscoveryRequest = builder.build();
         var summaryGeneratingListener = new SummaryGeneratingListener();
-        launcher.registerTestExecutionListeners(summaryGeneratingListener);
+        var unitTestListener = new UnitTestListener();
+        launcher.registerTestExecutionListeners(summaryGeneratingListener, unitTestListener);
         launcher.execute(launcherDiscoveryRequest);
 
         var summary = summaryGeneratingListener.getSummary();

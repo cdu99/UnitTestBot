@@ -12,7 +12,7 @@ import javax.tools.ToolProvider;
 
 public class CompileFileToTest {
 
-    public void compile(File fileToCompile) throws IOException {
+    public static void compile(File fileToCompile) throws IOException {
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager fileManager = compiler

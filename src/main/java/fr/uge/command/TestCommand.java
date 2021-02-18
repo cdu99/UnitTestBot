@@ -27,15 +27,15 @@ public class TestCommand implements Command {
             }
             CompletableFuture<File> attachment = attachments.get(0)
                     .downloadToFile("src/main/java/fr/uge/test/" + fileName);
-            try {
-                JavaFileTesting.compileAndTest(attachment.get());
-            } catch (InterruptedException | ExecutionException | IOException e) {
-                throw new AssertionError(e);
-            }
             attachment.exceptionally(error -> {
                 error.printStackTrace();
                 return null;
             });
+            try {
+                JavaFileTesting.compileAndTest(attachment.get(), event);
+            } catch (InterruptedException | ExecutionException | IOException e) {
+                throw new AssertionError(e);
+            }
         } else {
             channel.sendMessage("Please attach a java file !!")
                     .queue();

@@ -2,6 +2,7 @@ package fr.uge.bot;
 
 import fr.uge.database.TestResult;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.List;
@@ -20,5 +21,9 @@ public class BotService {
         eb.setFooter("Aller les zouz", null);
 
         event.getChannel().sendMessage(eb.build()).queue();
+    }
+
+    public static void sendCompilationErrorMessage(MessageReceivedEvent event, String fileName) {
+        event.getChannel().sendMessage("<@" + event.getAuthor().getId() + "> your file: " + fileName + " compile pas zebi").queue();
     }
 }

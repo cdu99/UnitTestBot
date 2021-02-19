@@ -26,7 +26,10 @@ public class JavaFileTesting {
         String expectedTestFileName = fileName + "Test";
         String studentId = event.getAuthor().getAsTag();
 
-        CompileFileToTest.compile(file);
+        if (!CompileFileToTest.compile(file)) {
+            BotService.sendCompilationErrorMessage(event, fileName);
+            return;
+        }
 
         try {
             TestRunner testRunner = new TestRunner(fileName);

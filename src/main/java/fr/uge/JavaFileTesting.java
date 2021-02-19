@@ -1,5 +1,6 @@
 package fr.uge;
 
+import fr.uge.bot.BotService;
 import fr.uge.compiler.CompileFileToTest;
 import fr.uge.database.Database;
 import fr.uge.database.TestResult;
@@ -35,5 +36,7 @@ public class JavaFileTesting {
             event.getChannel().sendMessage("No unit test found for this class").queue();
             throw new AssertionError(e);
         }
+
+        BotService.sendEmbedTestResult(event, testResults, fileName);
     }
 }

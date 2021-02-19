@@ -1,4 +1,4 @@
-package fr.uge.command;
+package fr.uge.bot.command;
 
 import fr.uge.JavaFileTesting;
 import net.dv8tion.jda.api.entities.Message;

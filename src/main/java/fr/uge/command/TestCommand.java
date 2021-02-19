@@ -32,7 +32,8 @@ public class TestCommand implements Command {
                 return null;
             });
             try {
-                JavaFileTesting.compileAndTest(attachment.get(), event);
+                var testing = new JavaFileTesting();
+                testing.compileAndTest(attachment.get(), event);
             } catch (InterruptedException | ExecutionException | IOException e) {
                 throw new AssertionError(e);
             }

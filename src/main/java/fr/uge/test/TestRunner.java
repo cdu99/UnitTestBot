@@ -1,15 +1,12 @@
 package fr.uge.test;
 
 import fr.uge.database.TestResult;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
-import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -46,22 +43,10 @@ public class TestRunner {
 
         Launcher launcher = LauncherFactory.create();
         LauncherDiscoveryRequest launcherDiscoveryRequest = builder.build();
-//        var summaryGeneratingListener = new SummaryGeneratingListener();
         var unitTestListener = new UnitTestListener(studentId);
         launcher.registerTestExecutionListeners(unitTestListener);
         launcher.execute(launcherDiscoveryRequest);
 
         return unitTestListener.getTestResults();
-//        var summary = summaryGeneratingListener.getSummary();
-//        if (summary.getTotalFailureCount() != 0) {
-//            var writer = new PrintWriter(System.err);
-//            summary.printTo(writer);
-//            summary.printFailuresTo(writer);
-//        }
-//        if (summary.getTestsFoundCount() == 0) {
-//            System.out.println("No tests found");
-//        } else {
-//            System.out.println(summary.getTestsFoundCount() + " tests found");
-//        }
     }
 }

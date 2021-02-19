@@ -21,6 +21,8 @@ public class Database {
         });
     }
 
+    // TODO
+    // Useless method??
     public void insertTestResult(String student, String question, String testName, boolean result) {
         jdbi.useHandle(handle -> handle.execute("insert into test_result values(?, ?, ?, ?)"
                 , student, question, testName, result));

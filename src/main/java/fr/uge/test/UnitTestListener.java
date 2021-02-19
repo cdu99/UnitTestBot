@@ -21,6 +21,8 @@ public class UnitTestListener implements TestExecutionListener {
         this.studentId = studentId;
     }
 
+    // TODO
+    // There are <null> tests to fix...
     public List<TestResult> getTestResults() {
         return testResults;
     }
@@ -31,18 +33,9 @@ public class UnitTestListener implements TestExecutionListener {
     }
 
     public void testPlanExecutionFinished(TestPlan testPlan) {
-
-        // Discord mp le student ses resultats
-        // OU PAS??
+        // TODO
+        // Do something??
     }
-
-//    public void dynamicTestRegistered(TestIdentifier testIdentifier) {
-//        if (testIdentifier.isTest()) {
-//            currentTestResult.setStudent(studentId);
-//            currentTestResult.setTest(testIdentifier.getDisplayName());
-//            currentTestResult.setQuestion(testIdentifier.getTags().iterator().next().getName());
-//        }
-//    }
 
     public void executionStarted(TestIdentifier testIdentifier) {
         if (testIdentifier.isTest()) {
@@ -53,7 +46,7 @@ public class UnitTestListener implements TestExecutionListener {
     }
 
     public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-        switch(testExecutionResult.getStatus()) {
+        switch (testExecutionResult.getStatus()) {
             case SUCCESSFUL:
                 if (testIdentifier.isTest()) {
                     currentTestResult.setResult(true);

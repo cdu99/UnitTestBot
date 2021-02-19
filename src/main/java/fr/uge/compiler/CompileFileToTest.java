@@ -13,7 +13,7 @@ import javax.tools.ToolProvider;
 public class CompileFileToTest {
 
     public static void compile(File fileToCompile) throws IOException {
-        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
+        DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager fileManager = compiler
                 .getStandardFileManager(diagnostics, null, null);
@@ -26,7 +26,8 @@ public class CompileFileToTest {
             System.out.println("File compiled");
         } else {
             for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-                // Discord (MP ou msg channel?) --> erreur de compilation
+                // TODO
+                // Send discord notification: COMPILATION ERROR
                 System.out.format("Error on line %d in %s%n", diagnostic.getLineNumber(), diagnostic.getSource().toUri());
             }
         }

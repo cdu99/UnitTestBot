@@ -8,9 +8,10 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+// TODO
+// Don't keep files on disk ? Keep in memory : Delete files once we're done
 public class JavaFileTesting {
     private List<TestResult> testResults;
     private final Database database;
@@ -22,11 +23,11 @@ public class JavaFileTesting {
     public void compileAndTest(File file, MessageReceivedEvent event) throws IOException {
         String fileName = file.getName().split("\\.")[0];
         String expectedTestFileName = fileName + "Test";
+        String studentId = event.getAuthor().getAsTag();
 
         CompileFileToTest.compile(file);
 
         try {
-            String studentId = event.getAuthor().getAsTag();
             TestRunner testRunner = new TestRunner(fileName);
             testResults = testRunner.run(expectedTestFileName, studentId);
             testResults.forEach(testResult -> database.insertTestResultBean(testResult));

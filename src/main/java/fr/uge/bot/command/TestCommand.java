@@ -1,6 +1,6 @@
 package fr.uge.bot.command;
 
-import fr.uge.JavaFileTesting;
+import fr.uge.UnitTestBot;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -26,7 +26,7 @@ public class TestCommand implements Command {
                 return;
             }
             // TODO
-            // retrieveInputStream maybe??
+            // Don't download
             CompletableFuture<File> attachment = attachments.get(0)
                     .downloadToFile("test-sources/" + fileName);
             attachment.exceptionally(error -> {
@@ -34,7 +34,7 @@ public class TestCommand implements Command {
                 return null;
             });
             try {
-                var testing = new JavaFileTesting();
+                var testing = new UnitTestBot();
                 testing.compileAndTest(attachment.get(), event);
             } catch (InterruptedException | ExecutionException | IOException e) {
                 throw new AssertionError(e);

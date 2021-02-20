@@ -1,20 +1,12 @@
 package fr.uge.compiler;
 
-import fr.uge.database.TestResult;
-import fr.uge.test.UnitTestListener;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -29,7 +21,7 @@ public class TestFiles {
     }
 
     private static ByteClassLoader createClassLoader(byte[] data, String name) {
-        return new ByteClassLoader(data);
+        return new ByteClassLoader(name, data);
 //        return new ClassLoader() {
 //            @Override
 //            public Class<?> findClass(String name) throws ClassNotFoundException {
@@ -54,10 +46,8 @@ public class TestFiles {
         try {
             builder.selectors(selectClass(cl.loadClass(classFileName)));
         } catch (NoClassDefFoundError e) {
-            String classPackage = getClassPackage(e.getMessage());
-            System.out.println(e.getMessage());
-            System.out.println(classPackage);
-            builder.selectors(selectClass(cl.loadClass(classPackage)));
+            String classBinaryName = getClassBinaryName(e.getMessage());
+            builder.selectors(selectClass(cl.loadClass(classBinaryName)));
         }
 
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
@@ -71,7 +61,7 @@ public class TestFiles {
         System.out.println(sum.getSummary().getTestsFoundCount());
     }
 
-    private static String getClassPackage(String errorMsg){
+    private static String getClassBinaryName(String errorMsg){
 
         // Start and end index of cutting
 

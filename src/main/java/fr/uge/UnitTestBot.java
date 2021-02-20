@@ -1,6 +1,7 @@
 package fr.uge;
 
 import fr.uge.bot.BotUtility;
+import fr.uge.compiler.ByteClassLoader;
 import fr.uge.compiler.CompileFileToTest;
 import fr.uge.database.Database;
 import fr.uge.database.TestResult;
@@ -11,16 +12,36 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // TODO
 // Don't keep files on disk ? Keep in memory : Delete files once we're done
-public class JavaFileTesting {
-    private List<TestResult> testResults;
+public class UnitTestBot {
+    private final Map<String, ByteClassLoader> testClassLoaders = new HashMap();
     private final Database database;
+    private List<TestResult> testResults;
 
-    public JavaFileTesting() {
+    private UnitTestBot() {
         database = new Database();
+    }
+
+    private static UnitTestBot INSTANCE = null;
+
+    public static synchronized UnitTestBot getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new UnitTestBot();
+        }
+        return INSTANCE;
+    }
+
+    public void addTestToClassLoader(String name, byte[] testFileData) {
+        testClassLoaders.put(name, createClassLoader(name, testFileData));
+    }
+
+    private ByteClassLoader createClassLoader(String name, byte[] data) {
+        return new ByteClassLoader(name, data);
     }
 
     public void compileAndTest(File file, MessageReceivedEvent event) throws IOException {
@@ -43,24 +64,6 @@ public class JavaFileTesting {
         }
 
         BotUtility.sendEmbedTestResult(event, testResults, fileName);
-    }
-
-    public static String getClassName(InputStream is) throws IOException {
-        DataInputStream dis = new DataInputStream(is);
-        dis.readLong(); // skip header and class version
-        int cpcnt = (dis.readShort()&0xffff)-1;
-        int[] classes = new int[cpcnt];
-        String[] strings = new String[cpcnt];
-        for(int i=0; i<cpcnt; i++) {
-            int t = dis.read();
-            if(t==7) classes[i] = dis.readShort()&0xffff;
-            else if(t==1) strings[i] = dis.readUTF();
-            else if(t==5 || t==6) { dis.readLong(); i++; }
-            else if(t==8) dis.readShort();
-            else dis.readInt();
-        }
-        dis.readShort(); // skip access flags
-        return strings[classes[(dis.readShort()&0xffff)-1]-1].replace('/', '.');
     }
 }
 

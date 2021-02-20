@@ -1,23 +1,31 @@
 package fr.uge.compiler;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ByteClassLoader extends ClassLoader {
-    private final byte[] fileData;
-    private Class<?> loadedClass;
-    private String className;
+    private final Map<String, byte[]> classData = new HashMap<>();
 
-    public ByteClassLoader(byte[] fileData) {
-        this.fileData = fileData;
-
+    public ByteClassLoader(String name, byte[] data) {
+        // Test file
+        addClassData(name, data);
     }
 
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
-        //no need to search class path, we already have byte code.
-        loadedClass = defineClass(name, fileData, 0, fileData.length);
-        return loadedClass;
+        byte[] data = classData.get(name);
+        if (data != null) {
+            return defineClass(name, data, 0, data.length);
+        } else {
+            return super.findClass(name);
+        }
     }
 
-    public String getClassCanonicalName() {
-        return loadedClass.getCanonicalName();
+    public void addClassData(String name, byte[] data) {
+        classData.put(name, data);
+    }
+
+    public void deleteClassData(String name) {
+        classData.remove(name);
     }
 }

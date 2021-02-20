@@ -25,6 +25,8 @@ public class TestCommand implements Command {
                         .queue();
                 return;
             }
+            // TODO
+            // retrieveInputStream maybe??
             CompletableFuture<File> attachment = attachments.get(0)
                     .downloadToFile("test-sources/" + fileName);
             attachment.exceptionally(error -> {

@@ -1,5 +1,6 @@
 package fr.uge.bot.command;
 
+import fr.uge.JavaFileTesting;
 import fr.uge.compiler.JavaByteObject;
 import fr.uge.compiler.TestFiles;
 import net.dv8tion.jda.api.entities.Message;
@@ -33,6 +34,9 @@ public class UnitTestCommand implements Command {
 //                    .downloadToFile("test-sources/" + fileName);
             CompletableFuture<InputStream> attachment = attachments.get(0).retrieveInputStream();
             try {
+//                InputStream is = attachment.get();
+//                String className = JavaFileTesting.getClassName(is);
+//                System.out.println(className);
                 byte[] classFile = attachment.get().readAllBytes();
                 var tf = new TestFiles();
                 tf.addTestFile(fileName.split("\\.")[0], classFile);

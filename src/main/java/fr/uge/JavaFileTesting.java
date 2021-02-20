@@ -1,14 +1,16 @@
 package fr.uge;
 
-import fr.uge.bot.BotService;
+import fr.uge.bot.BotUtility;
 import fr.uge.compiler.CompileFileToTest;
 import fr.uge.database.Database;
 import fr.uge.database.TestResult;
 import fr.uge.test.TestRunner;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 // TODO
@@ -27,7 +29,7 @@ public class JavaFileTesting {
         String studentId = event.getAuthor().getAsTag();
 
         if (!CompileFileToTest.compile(file)) {
-            BotService.sendCompilationErrorMessage(event, fileName);
+            BotUtility.sendCompilationErrorMessage(event, fileName);
             return;
         }
 
@@ -40,6 +42,26 @@ public class JavaFileTesting {
             throw new AssertionError(e);
         }
 
-        BotService.sendEmbedTestResult(event, testResults, fileName);
+        BotUtility.sendEmbedTestResult(event, testResults, fileName);
+    }
+
+    public static String getClassName(InputStream is) throws IOException {
+        DataInputStream dis = new DataInputStream(is);
+        dis.readLong(); // skip header and class version
+        int cpcnt = (dis.readShort()&0xffff)-1;
+        int[] classes = new int[cpcnt];
+        String[] strings = new String[cpcnt];
+        for(int i=0; i<cpcnt; i++) {
+            int t = dis.read();
+            if(t==7) classes[i] = dis.readShort()&0xffff;
+            else if(t==1) strings[i] = dis.readUTF();
+            else if(t==5 || t==6) { dis.readLong(); i++; }
+            else if(t==8) dis.readShort();
+            else dis.readInt();
+        }
+        dis.readShort(); // skip access flags
+        return strings[classes[(dis.readShort()&0xffff)-1]-1].replace('/', '.');
     }
 }
+
+

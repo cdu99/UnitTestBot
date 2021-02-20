@@ -21,21 +21,22 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 
 public class TestFiles {
     public Map<String, ClassLoader> testClassLoaders = new HashMap();
-    private ClassLoader cl;
+    private ByteClassLoader cl;
 
     public void addTestFile(String name, byte[] classFile) {
 
-        cl = createClassLoader(classFile);
+        cl = createClassLoader(classFile, name);
     }
 
-    private static ClassLoader createClassLoader(byte[] data) {
-        return new ClassLoader() {
-            @Override
-            public Class<?> findClass(String name) throws ClassNotFoundException {
-                //no need to search class path, we already have byte code.
-                return defineClass(name, data, 0, data.length);
-            }
-        };
+    private static ByteClassLoader createClassLoader(byte[] data, String name) {
+        return new ByteClassLoader(data);
+//        return new ClassLoader() {
+//            @Override
+//            public Class<?> findClass(String name) throws ClassNotFoundException {
+//                //no need to search class path, we already have byte code.
+//                return defineClass(name, data, 0, data.length);
+//            }
+//        };
     }
 
     public void run(String classFileName) throws ClassNotFoundException {
@@ -50,7 +51,15 @@ public class TestFiles {
 
     private void runTests(String classFileName) throws ClassNotFoundException {
         LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request();
-        builder.selectors(selectClass(cl.loadClass(classFileName)));
+        try {
+            builder.selectors(selectClass(cl.loadClass(classFileName)));
+        } catch (NoClassDefFoundError e) {
+            String classPackage = getClassPackage(e.getMessage());
+            System.out.println(e.getMessage());
+            System.out.println(classPackage);
+            builder.selectors(selectClass(cl.loadClass(classPackage)));
+        }
+
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
 
         Launcher launcher = LauncherFactory.create();
@@ -60,5 +69,20 @@ public class TestFiles {
         launcher.execute(launcherDiscoveryRequest);
 
         System.out.println(sum.getSummary().getTestsFoundCount());
+    }
+
+    private static String getClassPackage(String errorMsg){
+
+        // Start and end index of cutting
+
+        int endIndex = errorMsg.indexOf(" ");
+
+        // Let's save a substring
+        String classPackage = errorMsg.substring(0, endIndex);
+
+        // Replace char '/' to '.'
+        classPackage = classPackage.replace('/', '.');
+
+        return classPackage;
     }
 }

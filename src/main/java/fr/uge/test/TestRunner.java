@@ -1,5 +1,6 @@
 package fr.uge.test;
 
+import fr.uge.compiler.JavaByteObject;
 import fr.uge.database.TestResult;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -18,7 +19,7 @@ public class TestRunner {
     private final ClassLoader classLoader;
 
     public TestRunner(String javaCompiledFileToLoad) throws MalformedURLException, ClassNotFoundException {
-        File file = new File("src\\main\\java\\fr\\uge\\test");
+        File file = new File("test-sources");
         URL classUrl = file.toURI().toURL();
         URL[] classUrls = new URL[]{classUrl};
         ClassLoader classLoader = new URLClassLoader(classUrls, getClass().getClassLoader());
@@ -48,5 +49,17 @@ public class TestRunner {
         launcher.execute(launcherDiscoveryRequest);
 
         return unitTestListener.getTestResults();
+    }
+
+
+    private static ClassLoader createClassLoader(final JavaByteObject byteObject) {
+        return new ClassLoader() {
+            @Override
+            public Class<?> findClass(String name) throws ClassNotFoundException {
+                //no need to search class path, we already have byte code.
+                byte[] bytes = byteObject.getBytes();
+                return defineClass(name, bytes, 0, bytes.length);
+            }
+        };
     }
 }

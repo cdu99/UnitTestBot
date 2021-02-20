@@ -26,7 +26,7 @@ public class TestCommand implements Command {
                 return;
             }
             CompletableFuture<File> attachment = attachments.get(0)
-                    .downloadToFile("src/main/java/fr/uge/test/" + fileName);
+                    .downloadToFile("test-sources/" + fileName);
             attachment.exceptionally(error -> {
                 error.printStackTrace();
                 return null;

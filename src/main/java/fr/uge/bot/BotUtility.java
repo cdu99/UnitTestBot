@@ -2,37 +2,51 @@ package fr.uge.bot;
 
 import fr.uge.database.TestResult;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class BotUtility {
-    // TODO
-    // WIP
-    public static void sendEmbedTestResult(MessageReceivedEvent event, List<TestResult> testResults, String testedFile) {
-        // Create the EmbedBuilder instance
-        EmbedBuilder eb = new EmbedBuilder();
-        eb.setTitle("Test result");
-        eb.setColor(42069);
-        eb.setDescription("Result for test");
-        testResults.forEach(testResult -> eb.addField(testResult.getQuestion() + " " + testResult.getTest(), String.valueOf(testResult.getResult()), true));
-        eb.addBlankField(false);
-        eb.setAuthor(event.getAuthor().getAsTag(), null, null);
-        eb.setFooter("Aller les zouz", null);
+    private BotUtility() {
+        throw new IllegalStateException("Utility class");
+    }
 
+    public static String printMessageAuthor(MessageReceivedEvent event) {
+        return "<@" + event.getAuthor().getId() + ">";
+    }
+
+    public static void sendEmbedTestResult(MessageReceivedEvent event, List<TestResult> testResults, String testedFile) {
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle("Test result for `" + testedFile + "` :robot:");
+        testResults.sort(Comparator.comparing(TestResult::getQuestion).thenComparing(TestResult::getTest));
+        testResults.forEach(testResult ->
+                eb.addField(testResult.toString(), testResultEmote(testResult.getResult()), true));
+        eb.setColor(2438306);
+        eb.setAuthor(event.getAuthor().getAsTag(), null, event.getAuthor().getAvatarUrl());
         event.getChannel().sendMessage(eb.build()).queue();
     }
 
-    public static void sendCompilationErrorMessage(MessageReceivedEvent event, String fileName) {
-        event.getChannel().sendMessage("<@" + event.getAuthor().getId() + "> your file: " + fileName + " compile pas zebi").queue();
+    private static String testResultEmote(boolean result) {
+        if (result) {
+            return ":white_check_mark:";
+        } else {
+            return ":x:";
+        }
+    }
+
+    public static void sendCompilationErrorMessage(MessageReceivedEvent event) {
+        event.getChannel().sendMessage(":x: " + printMessageAuthor(event) +
+                " Your file does not compile :rofl:").queue();
     }
 
     public static void sendNoAvailableTestForNowMessage(MessageReceivedEvent event, String fileName) {
-        event.getChannel().sendMessage("<@" + event.getAuthor().getId() + "> your file: " + fileName + " a pas de test corerspond").queue();
+        event.getChannel().sendMessage(":x: No test available for `" + fileName + "`").queue();
     }
 
-    public static void sendErrorDuringTestMessage(MessageReceivedEvent event, String testFileName) {
-        event.getChannel().sendMessage("<@" + event.getAuthor().getId() + ">  Error trying to run your test on "+ testFileName  +"verify if goo dpalcal").queue();
+    public static void sendErrorDuringTestMessage(MessageReceivedEvent event) {
+        event.getChannel().sendMessage(":x: <@" + event.getAuthor().getId() +
+                ">  **ERROR** trying to run tests on your file. " +
+                "Please verify if your file is correct :rotating_light:").queue();
     }
 }

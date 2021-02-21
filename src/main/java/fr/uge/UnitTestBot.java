@@ -54,7 +54,7 @@ public class UnitTestBot {
         // Compile
         Map<String, byte[]> compiled = compileSource(file);
         if (compiled == null) {
-            BotUtility.sendCompilationErrorMessage(event, fileName);
+            BotUtility.sendCompilationErrorMessage(event);
             return;
         }
         // Create class loader and add all required data to load

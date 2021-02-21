@@ -12,7 +12,7 @@ public class Main {
         BasicConfigurator.configure();
 
         JDABuilder.createDefault("Nzk1NjA4NDAyODAwOTM0OTgz.X_L2EA.XWr5S82moiVmdrF-PvZDBhMX-NI")
-                .setActivity(Activity.playing("WIP"))
+                .setActivity(Activity.streaming("League of Legends", "https://www.youtube.com/watch?v=dQw4w9WgXcQ"))
                 .addEventListeners(new Listener())
                 .build();
     }

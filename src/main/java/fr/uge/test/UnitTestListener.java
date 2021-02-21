@@ -9,6 +9,7 @@ import org.junit.platform.launcher.TestPlan;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class UnitTestListener implements TestExecutionListener {
     private TestResult currentTestResult;
@@ -29,14 +30,17 @@ public class UnitTestListener implements TestExecutionListener {
         this.testResults = new ArrayList<>();
     }
 
-    // TODO ?
-    // When there is no tag <null>
     @Override
     public void executionStarted(TestIdentifier testIdentifier) {
         if (testIdentifier.isTest()) {
             currentTestResult.setStudent(studentId);
             currentTestResult.setTest(testIdentifier.getDisplayName());
-            currentTestResult.setQuestion(testIdentifier.getTags().iterator().next().getName());
+            try {
+                currentTestResult.setQuestion(testIdentifier.getTags().iterator().next().getName());
+            } catch (NoSuchElementException e) {
+                System.out.println("No question tag");
+                currentTestResult.setQuestion("*");
+            }
         }
     }
 

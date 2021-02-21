@@ -22,7 +22,7 @@ public class TestCommand implements Command {
         if (!attachments.isEmpty()) {
             String fileName = attachments.get(0).getFileName();
             if (!fileName.endsWith(".java")) {
-                channel.sendMessage(":x: Must be a Java file :coffee:").queue();
+                channel.sendMessage(":x: Must be a Java file :hotsprings:").queue();
                 return;
             }
             // TODO
@@ -35,7 +35,7 @@ public class TestCommand implements Command {
             });
             compileAndTest(attachment, event);
         } else {
-            channel.sendMessage(":x: Please attach a Java file :coffee:").queue();
+            channel.sendMessage(":x: Please attach a Java file :hotsprings:").queue();
         }
     }
 

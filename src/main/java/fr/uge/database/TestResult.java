@@ -47,4 +47,9 @@ public class TestResult {
     public void setResult(boolean result) {
         this.result = result;
     }
+
+    @Override
+    public String toString() {
+        return getQuestion() + ". " + getTest();
+    }
 }

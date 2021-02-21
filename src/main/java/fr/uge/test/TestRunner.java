@@ -57,7 +57,7 @@ public class TestRunner {
         try {
             launcher.execute(launcherDiscoveryRequest);
         } catch (JUnitException je) {
-            BotUtility.sendErrorDuringTestMessage(event, testFileName);
+            BotUtility.sendErrorDuringTestMessage(event);
             throw new AssertionError(je);
         }
 

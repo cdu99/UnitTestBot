@@ -28,7 +28,7 @@ public class CommandManager {
         if (commands.containsKey(message)) {
             commands.get(message).execute(event);
         } else {
-            event.getChannel().sendMessage(":x: Command not found").queue();
+            event.getChannel().sendMessage(":x: Command not found :face_with_monocle:").queue();
         }
     }
 }

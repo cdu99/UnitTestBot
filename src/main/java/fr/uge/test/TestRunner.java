@@ -1,7 +1,10 @@
 package fr.uge.test;
 
+import fr.uge.bot.BotUtility;
 import fr.uge.compiled.ByteClassLoader;
 import fr.uge.database.TestResult;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 
@@ -26,17 +29,17 @@ public class TestRunner {
         });
     }
 
-    public List<TestResult> run(String testFileName, String studentId) throws ClassNotFoundException {
+    public List<TestResult> run(String testFileName, MessageReceivedEvent event) throws ClassNotFoundException {
         var oldContext = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
         try {
-            return runTests(testFileName, studentId);
+            return runTests(testFileName, event);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContext);
         }
     }
 
-    private List<TestResult> runTests(String testFileName, String studentId) throws ClassNotFoundException {
+    private List<TestResult> runTests(String testFileName, MessageReceivedEvent event) throws ClassNotFoundException {
         var builder = LauncherDiscoveryRequestBuilder.request();
         try {
             builder.selectors(selectClass(classLoader.loadClass(testFileName)));
@@ -49,9 +52,15 @@ public class TestRunner {
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
         var launcher = LauncherFactory.create();
         var launcherDiscoveryRequest = builder.build();
-        var unitTestListener = new UnitTestListener(studentId);
+        var unitTestListener = new UnitTestListener(event.getAuthor().getAsTag());
         launcher.registerTestExecutionListeners(unitTestListener);
-        launcher.execute(launcherDiscoveryRequest);
+        try {
+            launcher.execute(launcherDiscoveryRequest);
+        } catch (JUnitException je) {
+            BotUtility.sendErrorDuringTestMessage(event, testFileName);
+            throw new AssertionError(je);
+        }
+
         return unitTestListener.getTestResults();
     }
 

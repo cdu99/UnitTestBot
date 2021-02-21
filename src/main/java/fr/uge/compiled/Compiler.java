@@ -12,22 +12,22 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 
-public record CompileFileToTest(File fileToCompile) {
-    public CompileFileToTest {
+public class Compiler {
+    private final File fileToCompile;
+    private final JavaCompiler javac;
+
+    public Compiler(File fileToCompile) {
         Objects.requireNonNull(fileToCompile);
+        this.fileToCompile = fileToCompile;
+        this.javac = ToolProvider.getSystemJavaCompiler();
     }
 
     public Map<String, byte[]> compile() throws IOException {
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        var compiler = ToolProvider.getSystemJavaCompiler();
-        var standardFileManager = compiler
-                .getStandardFileManager(diagnostics, null, null);
-        var fileManager = new ByteFileManager
-                (compiler.getStandardFileManager(null, null, null));
-        var compilationUnit = standardFileManager
-                .getJavaFileObjectsFromFiles(Arrays.asList(fileToCompile));
-        JavaCompiler.CompilationTask task = compiler
-                .getTask(null, fileManager, diagnostics, null, null, compilationUnit);
+        var standardFileManager = javac.getStandardFileManager(diagnostics, null, null);
+        var fileManager = new ByteFileManager(standardFileManager);
+        var compilationUnit = standardFileManager.getJavaFileObjectsFromFiles(Arrays.asList(fileToCompile));
+        JavaCompiler.CompilationTask task = javac.getTask(null, fileManager, diagnostics, null, null, compilationUnit);
 
         try {
             if (Boolean.TRUE.equals(task.call())) {

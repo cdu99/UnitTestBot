@@ -27,4 +27,12 @@ public class BotUtility {
     public static void sendCompilationErrorMessage(MessageReceivedEvent event, String fileName) {
         event.getChannel().sendMessage("<@" + event.getAuthor().getId() + "> your file: " + fileName + " compile pas zebi").queue();
     }
+
+    public static void sendNoAvailableTestForNowMessage(MessageReceivedEvent event, String fileName) {
+        event.getChannel().sendMessage("<@" + event.getAuthor().getId() + "> your file: " + fileName + " a pas de test corerspond").queue();
+    }
+
+    public static void sendErrorDuringTestMessage(MessageReceivedEvent event, String testFileName) {
+        event.getChannel().sendMessage("<@" + event.getAuthor().getId() + ">  Error trying to run your test on "+ testFileName  +"verify if goo dpalcal").queue();
+    }
 }

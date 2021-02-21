@@ -13,6 +13,8 @@ public class Database {
         this.jdbi = Jdbi.create(UNIT_TEST_DATABASE);
     }
 
+    // TODO
+    // Add column to savoir quel est le fichier de test
     public void createTable() {
         jdbi.useHandle(handle -> {
             handle.execute("drop table if exists test_result;");

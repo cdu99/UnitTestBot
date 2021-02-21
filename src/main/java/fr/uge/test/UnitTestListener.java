@@ -29,6 +29,8 @@ public class UnitTestListener implements TestExecutionListener {
         this.testResults = new ArrayList<>();
     }
 
+    // TODO ?
+    // When there is no tag <null>
     @Override
     public void executionStarted(TestIdentifier testIdentifier) {
         if (testIdentifier.isTest()) {

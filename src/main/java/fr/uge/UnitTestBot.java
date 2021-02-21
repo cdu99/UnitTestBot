@@ -2,7 +2,7 @@ package fr.uge;
 
 import fr.uge.bot.BotUtility;
 import fr.uge.compiled.ByteClassLoader;
-import fr.uge.compiled.CompileFileToTest;
+import fr.uge.compiled.Compiler;
 import fr.uge.database.Database;
 import fr.uge.database.TestResult;
 import fr.uge.test.TestRunner;
@@ -10,17 +10,15 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO
-// Don't keep files on disk ? Keep in memory : Delete files once we're done
 public class UnitTestBot {
-    private final Map<String, byte[]> testClassData = new HashMap();
+    private final Map<String, byte[]> testData = new HashMap<>();
     private final Database database;
-    private List<TestResult> testResults;
 
     private UnitTestBot() {
         database = new Database();
@@ -36,47 +34,64 @@ public class UnitTestBot {
         return INSTANCE;
     }
 
-    public void addTestToClassLoader(String name, byte[] testFileData) {
-        if (testClassData.containsKey(name)) {
-            testClassData.remove(name);
+    public void addUnitTest(String name, byte[] testFileData) {
+        if (testData.containsKey(name)) {
+            testData.remove(name);
         }
-        testClassData.put(name, testFileData);
+        testData.put(name, testFileData);
     }
 
     public void compileAndTest(File file, MessageReceivedEvent event) throws IOException {
         String fileName = file.getName().split("\\.")[0];
         String expectedTestFileName = fileName + "Test";
-        String studentId = event.getAuthor().getAsTag();
 
-//        if (!CompileFileToTest.compile(file)) {
-//            BotUtility.sendCompilationErrorMessage(event, fileName);
-//            return;
-//        }
-
-        CompileFileToTest cp = new CompileFileToTest(file);
-        Map<String, byte[]> data = cp.compile();
-        if (data == null) {
-            BotUtility.sendCompilationErrorMessage(event, fileName);
+        // Check if test exist
+        if (!testData.containsKey(expectedTestFileName)) {
+            Files.delete(file.getAbsoluteFile().toPath());
+            BotUtility.sendNoAvailableTestForNowMessage(event, fileName);
+            return;
         }
-
-        List<String> javaClassesToLoad = new ArrayList<>();
-        var dataded = testClassData.get(expectedTestFileName);
-        var currentClassLoader = new ByteClassLoader(expectedTestFileName, dataded);
-        for (Map.Entry<String, byte[]> entry : data.entrySet()) {
-            javaClassesToLoad.add(entry.getKey());
+        // Compile
+        Map<String, byte[]> compiled = compileSource(file);
+        if (compiled == null) {
+            BotUtility.sendCompilationErrorMessage(event, fileName);
+            return;
+        }
+        // Create class loader and add all required data to load
+        var currentClassLoader = createTestClassLoader(expectedTestFileName);
+        List<String> classesToLoad = new ArrayList<>();
+        for (Map.Entry<String, byte[]> entry : compiled.entrySet()) {
+            classesToLoad.add(entry.getKey());
             currentClassLoader.addClassData(entry.getKey(), entry.getValue());
         }
+        // Run the test with class loader
+        var testRunner = new TestRunner(currentClassLoader, classesToLoad);
+        List<TestResult> testResults = testing(testRunner, expectedTestFileName, event);
+        // Add results to database
+        addTestResultsToDatabase(testResults);
+        BotUtility.sendEmbedTestResult(event, testResults, fileName);
+    }
 
+    private Map<String, byte[]> compileSource(File file) throws IOException {
+        Compiler compiler = new Compiler(file);
+        return compiler.compile();
+    }
+
+    private ByteClassLoader createTestClassLoader(String name) {
+        var data = testData.get(name);
+        return new ByteClassLoader(name, data);
+    }
+
+    private List<TestResult> testing(TestRunner testRunner, String testFileName, MessageReceivedEvent event) {
         try {
-            TestRunner testRunner = new TestRunner(currentClassLoader, javaClassesToLoad);
-            testResults = testRunner.run(expectedTestFileName, studentId);
-            testResults.forEach(testResult -> database.insertTestResultBean(testResult));
+            return testRunner.run(testFileName, event);
         } catch (ClassNotFoundException e) {
-            event.getChannel().sendMessage("No unit test found for this class").queue();
             throw new AssertionError(e);
         }
+    }
 
-        BotUtility.sendEmbedTestResult(event, testResults, fileName);
+    private void addTestResultsToDatabase(List<TestResult> testResults) {
+        testResults.forEach(database::insertTestResultBean);
     }
 }
 

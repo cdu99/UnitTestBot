@@ -30,7 +30,7 @@ public class UnitTestCommand implements Command {
                 error.printStackTrace();
                 return null;
             });
-            addTestData(attachment, fileName);
+            addUnitTest(attachment, fileName);
         } else {
             channel.sendMessage(":x: Please attach a compiled JUnit test file :gear:").queue();
         }
@@ -41,11 +41,13 @@ public class UnitTestCommand implements Command {
         return "!unittest";
     }
 
-    private void addTestData(CompletableFuture<InputStream> compiledTestFileInputStream, String fileName) {
+    private void addUnitTest(CompletableFuture<InputStream> compiledTestFileInputStream, String fileName) {
         Objects.requireNonNull(compiledTestFileInputStream);
         try {
+            // TODO
+            // Discord message
             byte[] testData = compiledTestFileInputStream.get().readAllBytes();
-            UnitTestBot.getInstance().addTestToClassLoader(fileName.split("\\.")[0], testData);
+            UnitTestBot.getInstance().addUnitTest(fileName.split("\\.")[0], testData);
         } catch (ExecutionException | IOException e) {
             throw new AssertionError(e);
         } catch (InterruptedException e) {

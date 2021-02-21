@@ -1,6 +1,5 @@
 package fr.uge.test;
 
-import fr.uge.database.Database;
 import fr.uge.database.TestResult;
 import org.junit.platform.commons.PreconditionViolationException;
 import org.junit.platform.engine.TestExecutionResult;
@@ -10,7 +9,6 @@ import org.junit.platform.launcher.TestPlan;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class UnitTestListener implements TestExecutionListener {
     private TestResult currentTestResult;
@@ -21,22 +19,17 @@ public class UnitTestListener implements TestExecutionListener {
         this.studentId = studentId;
     }
 
-    // TODO
-    // There are <null> tests to fix...
     public List<TestResult> getTestResults() {
         return testResults;
     }
 
+    @Override
     public void testPlanExecutionStarted(TestPlan testPlan) {
         this.currentTestResult = new TestResult();
         this.testResults = new ArrayList<>();
     }
 
-    public void testPlanExecutionFinished(TestPlan testPlan) {
-        // TODO
-        // Do something??
-    }
-
+    @Override
     public void executionStarted(TestIdentifier testIdentifier) {
         if (testIdentifier.isTest()) {
             currentTestResult.setStudent(studentId);
@@ -45,28 +38,19 @@ public class UnitTestListener implements TestExecutionListener {
         }
     }
 
+    @Override
     public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-        switch (testExecutionResult.getStatus()) {
-            case SUCCESSFUL:
-                if (testIdentifier.isTest()) {
-                    currentTestResult.setResult(true);
-                }
-                testResults.add(currentTestResult);
-                currentTestResult = new TestResult();
-                break;
-            case FAILED:
-                if (testIdentifier.isTest()) {
-                    currentTestResult.setResult(false);
-                }
-                testResults.add(currentTestResult);
-                currentTestResult = new TestResult();
-                break;
-            case ABORTED:
-                testResults.add(currentTestResult);
-                currentTestResult = new TestResult();
-                break;
-            default:
+        TestExecutionResult.Status result = testExecutionResult.getStatus();
+        if (testIdentifier.isTest()) {
+            if (result == TestExecutionResult.Status.SUCCESSFUL) {
+                currentTestResult.setResult(true);
+            } else if (result == TestExecutionResult.Status.FAILED) {
+                currentTestResult.setResult(false);
+            } else {
                 throw new PreconditionViolationException("Unsupported execution status:" + testExecutionResult.getStatus());
+            }
+            testResults.add(currentTestResult);
+            currentTestResult = new TestResult();
         }
     }
 }

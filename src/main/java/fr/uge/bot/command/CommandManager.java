@@ -1,6 +1,5 @@
-package fr.uge.command;
+package fr.uge.bot.command;
 
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.HashMap;
@@ -29,9 +28,7 @@ public class CommandManager {
         if (commands.containsKey(message)) {
             commands.get(message).execute(event);
         } else {
-            MessageChannel channel = event.getChannel();
-            channel.sendMessage("Command not found :(")
-                    .queue();
+            event.getChannel().sendMessage(":x: Command not found").queue();
         }
     }
 }

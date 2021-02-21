@@ -1,6 +1,6 @@
-package fr.uge;
+package fr.uge.bot;
 
-import fr.uge.command.CommandManager;
+import fr.uge.bot.command.CommandManager;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;

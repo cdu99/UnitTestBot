@@ -2,6 +2,8 @@ package fr.uge.database;
 
 import org.jdbi.v3.core.mapper.reflect.ColumnName;
 
+import java.util.Objects;
+
 public class TestResult {
     private String student;
     private String question;
@@ -14,6 +16,7 @@ public class TestResult {
     }
 
     public void setStudent(String student) {
+        Objects.requireNonNull(student);
         this.student = student;
     }
 
@@ -32,6 +35,7 @@ public class TestResult {
     }
 
     public void setTest(String test) {
+        Objects.requireNonNull(test);
         this.test = test;
     }
 

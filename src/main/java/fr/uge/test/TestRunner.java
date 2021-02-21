@@ -1,52 +1,74 @@
 package fr.uge.test;
 
+import fr.uge.bot.BotUtility;
+import fr.uge.compiled.ByteClassLoader;
 import fr.uge.database.TestResult;
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.junit.platform.commons.JUnitException;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 public class TestRunner {
-    private final ClassLoader classLoader;
+    private final ByteClassLoader classLoader;
 
-    public TestRunner(String javaCompiledFileToLoad) throws MalformedURLException, ClassNotFoundException {
-        File file = new File("src\\main\\java\\fr\\uge\\test");
-        URL classUrl = file.toURI().toURL();
-        URL[] classUrls = new URL[]{classUrl};
-        ClassLoader classLoader = new URLClassLoader(classUrls, getClass().getClassLoader());
-        classLoader.loadClass(javaCompiledFileToLoad);
+    public TestRunner(ByteClassLoader classLoader, List<String> javaCompiledFileToLoad) {
+        Objects.requireNonNull(classLoader);
+        Objects.requireNonNull(javaCompiledFileToLoad);
         this.classLoader = classLoader;
+        javaCompiledFileToLoad.forEach(compiledFile -> {
+            try {
+                classLoader.loadClass(compiledFile);
+            } catch (ClassNotFoundException e) {
+                throw new AssertionError(e);
+            }
+        });
     }
 
-    public List<TestResult> run(String classFileName, String studentId) throws ClassNotFoundException {
+    public List<TestResult> run(String testFileName, MessageReceivedEvent event) throws ClassNotFoundException {
         var oldContext = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
         try {
-            return runTests(classFileName, studentId);
+            return runTests(testFileName, event);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContext);
         }
     }
 
-    private List<TestResult> runTests(String classFileName, String studentId) throws ClassNotFoundException {
-        LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request();
-        builder.selectors(selectClass(classLoader.loadClass(classFileName)));
+    private List<TestResult> runTests(String testFileName, MessageReceivedEvent event) throws ClassNotFoundException {
+        var builder = LauncherDiscoveryRequestBuilder.request();
+        try {
+            builder.selectors(selectClass(classLoader.loadClass(testFileName)));
+        } catch (NoClassDefFoundError e) {
+            // Trick to avoid NoClassDefFoundError if the test is in a package
+            String testClassBinaryName = getClassBinaryName(e.getMessage());
+            classLoader.changeClassDataName(testFileName, testClassBinaryName);
+            builder.selectors(selectClass(classLoader.loadClass(testClassBinaryName)));
+        }
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
-
-        Launcher launcher = LauncherFactory.create();
-        LauncherDiscoveryRequest launcherDiscoveryRequest = builder.build();
-        var unitTestListener = new UnitTestListener(studentId);
+        var launcher = LauncherFactory.create();
+        var launcherDiscoveryRequest = builder.build();
+        var unitTestListener = new UnitTestListener(event.getAuthor().getAsTag());
         launcher.registerTestExecutionListeners(unitTestListener);
-        launcher.execute(launcherDiscoveryRequest);
+        try {
+            launcher.execute(launcherDiscoveryRequest);
+        } catch (JUnitException je) {
+            BotUtility.sendErrorDuringTestMessage(event, testFileName);
+            throw new AssertionError(je);
+        }
 
         return unitTestListener.getTestResults();
+    }
+
+    // Trick to find binary name with NoClassDefFoundError error msg
+    private String getClassBinaryName(String errorMsg) {
+        int endIndex = errorMsg.indexOf(" ");
+        String classPackage = errorMsg.substring(0, endIndex);
+        classPackage = classPackage.replace('/', '.');
+        return classPackage;
     }
 }

@@ -37,11 +37,10 @@ public class UnitTestBot {
     }
 
     public void addTestToClassLoader(String name, byte[] testFileData) {
-        testClassLoaders.put(name, createClassLoader(name, testFileData));
-    }
-
-    private ByteClassLoader createClassLoader(String name, byte[] data) {
-        return new ByteClassLoader(name, data);
+        if (testClassLoaders.containsKey(name)) {
+            testClassLoaders.remove(name);
+        }
+        testClassLoaders.put(name, new ByteClassLoader(name, testFileData));
     }
 
     public void compileAndTest(File file, MessageReceivedEvent event) throws IOException {
@@ -49,13 +48,19 @@ public class UnitTestBot {
         String expectedTestFileName = fileName + "Test";
         String studentId = event.getAuthor().getAsTag();
 
-        if (!CompileFileToTest.compile(file)) {
-            BotUtility.sendCompilationErrorMessage(event, fileName);
-            return;
+//        if (!CompileFileToTest.compile(file)) {
+//            BotUtility.sendCompilationErrorMessage(event, fileName);
+//            return;
+//        }
+
+        byte[] data = CompileFileToTest.compile(file);
+        if (data == null) {
+            System.out.println("NSM");
         }
 
         try {
-            TestRunner testRunner = new TestRunner(fileName);
+            testClassLoaders.get(expectedTestFileName).addClassData(fileName, data);
+            TestRunner testRunner = new TestRunner(testClassLoaders.get(expectedTestFileName), fileName);
             testResults = testRunner.run(expectedTestFileName, studentId);
             testResults.forEach(testResult -> database.insertTestResultBean(testResult));
         } catch (ClassNotFoundException e) {

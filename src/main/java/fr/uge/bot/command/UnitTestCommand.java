@@ -1,5 +1,6 @@
 package fr.uge.bot.command;
 
+import fr.uge.UnitTestBot;
 import fr.uge.compiler.TestFiles;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -26,18 +27,29 @@ public class UnitTestCommand implements Command {
                 return;
             }
             CompletableFuture<InputStream> attachment = attachments.get(0).retrieveInputStream();
+//            try {
+//                byte[] classData = attachment.get().readAllBytes();
+//                var tf = new TestFiles();
+//                tf.addTestFile(fileName.split("\\.")[0], classData);
+//                tf.run(fileName.split("\\.")[0]);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } catch (ClassNotFoundException e) {
+//                e.printStackTrace();
+//            }
+
             try {
                 byte[] classData = attachment.get().readAllBytes();
-                var tf = new TestFiles();
-                tf.addTestFile(fileName.split("\\.")[0], classData);
-                tf.run(fileName.split("\\.")[0]);
+                UnitTestBot.getInstance().addTestToClassLoader(fileName.split("\\.")[0], classData);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
             attachment.exceptionally(error -> {

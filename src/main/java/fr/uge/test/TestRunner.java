@@ -1,5 +1,6 @@
 package fr.uge.test;
 
+import fr.uge.compiler.ByteClassLoader;
 import fr.uge.database.TestResult;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
@@ -15,15 +16,11 @@ import java.util.List;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 public class TestRunner {
-    private final ClassLoader classLoader;
+    private final ByteClassLoader classLoader;
 
-    public TestRunner(String javaCompiledFileToLoad) throws MalformedURLException, ClassNotFoundException {
-        File file = new File("test-sources");
-        URL classUrl = file.toURI().toURL();
-        URL[] classUrls = new URL[]{classUrl};
-        ClassLoader classLoader = new URLClassLoader(classUrls, getClass().getClassLoader());
-        classLoader.loadClass(javaCompiledFileToLoad);
+    public TestRunner(ByteClassLoader classLoader, String javaCompiledFileToLoad) throws MalformedURLException, ClassNotFoundException {
         this.classLoader = classLoader;
+        classLoader.loadClass(javaCompiledFileToLoad);
     }
 
     public List<TestResult> run(String classFileName, String studentId) throws ClassNotFoundException {
@@ -38,7 +35,13 @@ public class TestRunner {
 
     private List<TestResult> runTests(String classFileName, String studentId) throws ClassNotFoundException {
         LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request();
-        builder.selectors(selectClass(classLoader.loadClass(classFileName)));
+        try {
+            builder.selectors(selectClass(classLoader.loadClass(classFileName)));
+        } catch (NoClassDefFoundError e) {
+            String classBinaryName = getClassBinaryName(e.getMessage());
+            builder.selectors(selectClass(classLoader.loadClass(classBinaryName)));
+        }
+
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
 
         Launcher launcher = LauncherFactory.create();
@@ -48,5 +51,20 @@ public class TestRunner {
         launcher.execute(launcherDiscoveryRequest);
 
         return unitTestListener.getTestResults();
+    }
+
+    private static String getClassBinaryName(String errorMsg){
+
+        // Start and end index of cutting
+
+        int endIndex = errorMsg.indexOf(" ");
+
+        // Let's save a substring
+        String classPackage = errorMsg.substring(0, endIndex);
+
+        // Replace char '/' to '.'
+        classPackage = classPackage.replace('/', '.');
+
+        return classPackage;
     }
 }

@@ -13,9 +13,9 @@ public class CompileFileToTestTest {
     public void should_compile_java_file() throws IOException {
         File javaFileToBeCompiled = new File("src\\test\\java\\fr\\uge\\compiler\\ToBeCompiled.java");
         File expectedCompiledJavaFile = new File("src\\test\\java\\fr\\uge\\compiler\\ToBeCompiled.class");
-        CompileFileToTest.compile(javaFileToBeCompiled);
 
-        assertTrue(expectedCompiledJavaFile.exists());
+
+        System.out.println(CompileFileToTest.compile(javaFileToBeCompiled));
 
         expectedCompiledJavaFile.delete();
     }

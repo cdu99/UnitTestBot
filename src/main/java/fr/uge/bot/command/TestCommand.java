@@ -28,17 +28,26 @@ public class TestCommand implements Command {
             // TODO
             // Don't download
             CompletableFuture<File> attachment = attachments.get(0)
-                    .downloadToFile("test-sources/" + fileName);
+                    .downloadToFile("src/main/java/fr/uge/test/" + fileName);
             attachment.exceptionally(error -> {
                 error.printStackTrace();
                 return null;
             });
             try {
-                var testing = new UnitTestBot();
-                testing.compileAndTest(attachment.get(), event);
-            } catch (InterruptedException | ExecutionException | IOException e) {
-                throw new AssertionError(e);
+                UnitTestBot.getInstance().compileAndTest(attachment.get(), event);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
+//            try {
+//                var testing = new UnitTestBot();
+//                testing.compileAndTest(attachment.get(), event);
+//            } catch (InterruptedException | ExecutionException | IOException e) {
+//                throw new AssertionError(e);
+//            }
         } else {
             channel.sendMessage("Please attach a java file !!")
                     .queue();

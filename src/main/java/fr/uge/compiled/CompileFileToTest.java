@@ -1,46 +1,45 @@
-package fr.uge.compiler;
+package fr.uge.compiled;
 
-import java.io.*;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-public class CompileFileToTest {
+public record CompileFileToTest(File fileToCompile) {
+    public CompileFileToTest {
+        Objects.requireNonNull(fileToCompile);
+    }
 
-    public static Map<String, byte[]> compile(File fileToCompile) throws IOException {
+    public Map<String, byte[]> compile() throws IOException {
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        StandardJavaFileManager fileManagerToGetFile = compiler
+        var compiler = ToolProvider.getSystemJavaCompiler();
+        var standardFileManager = compiler
                 .getStandardFileManager(diagnostics, null, null);
-
-        ExtendedStandardJavaFileManager fileManager = new ExtendedStandardJavaFileManager(compiler.getStandardFileManager(null, null, null));
-        Iterable<? extends JavaFileObject> compilationUnit = fileManagerToGetFile
+        var fileManager = new ByteFileManager
+                (compiler.getStandardFileManager(null, null, null));
+        var compilationUnit = standardFileManager
                 .getJavaFileObjectsFromFiles(Arrays.asList(fileToCompile));
         JavaCompiler.CompilationTask task = compiler
                 .getTask(null, fileManager, diagnostics, null, null, compilationUnit);
 
         try {
-            if (task.call()) {
-                System.out.println("File compiled");
-                Map<String, byte[]> classBytes = fileManager.getClassBytes();
-                return classBytes;
+            if (Boolean.TRUE.equals(task.call())) {
+                return fileManager.getClassBytes();
             } else {
                 for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-                    // TODO
-                    // Send discord notification: COMPILATION ERROR
                     System.out.format("Error on line %d in %s%n", diagnostic.getLineNumber(), diagnostic.getSource().toUri());
                 }
                 return null;
             }
         } finally {
-            fileToCompile.delete();
+            Files.delete(fileToCompile.getAbsoluteFile().toPath());
             fileManager.close();
         }
     }

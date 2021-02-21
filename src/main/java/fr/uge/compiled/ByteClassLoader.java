@@ -1,4 +1,4 @@
-package fr.uge.compiler;
+package fr.uge.compiled;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,14 +7,13 @@ public class ByteClassLoader extends ClassLoader {
     private final Map<String, byte[]> classData = new HashMap<>();
 
     public ByteClassLoader(String name, byte[] data) {
-        // Test file
+        // Test data
         addClassData(name, data);
     }
 
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
         byte[] data = classData.get(name);
-        System.out.println(classData.toString());
         if (data != null) {
             return defineClass(name, data, 0, data.length);
         } else {
@@ -26,11 +25,9 @@ public class ByteClassLoader extends ClassLoader {
         classData.put(name, data);
     }
 
-    public void deleteClassData(String name) {
-        classData.remove(name);
-    }
-
-    public byte[] getClassDataForKey(String key) {
-        return classData.get(key);
+    public void changeClassDataName(String oldName, String newName) {
+        byte[] data = classData.get(oldName);
+        classData.remove(oldName);
+        classData.put(newName, data);
     }
 }

@@ -1,79 +1,65 @@
 package fr.uge.test;
 
-import fr.uge.compiler.ByteClassLoader;
+import fr.uge.compiled.ByteClassLoader;
 import fr.uge.database.TestResult;
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 public class TestRunner {
     private final ByteClassLoader classLoader;
 
-    public TestRunner(ByteClassLoader classLoader, List<String> javaCompiledFileToLoad) throws MalformedURLException, ClassNotFoundException {
+    public TestRunner(ByteClassLoader classLoader, List<String> javaCompiledFileToLoad) {
+        Objects.requireNonNull(classLoader);
+        Objects.requireNonNull(javaCompiledFileToLoad);
         this.classLoader = classLoader;
-        javaCompiledFileToLoad.forEach(load -> {
+        javaCompiledFileToLoad.forEach(compiledFile -> {
             try {
-                classLoader.loadClass(load);
+                classLoader.loadClass(compiledFile);
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                throw new AssertionError(e);
             }
         });
     }
 
-    public List<TestResult> run(String classFileName, String studentId) throws ClassNotFoundException {
+    public List<TestResult> run(String testFileName, String studentId) throws ClassNotFoundException {
         var oldContext = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
         try {
-            return runTests(classFileName, studentId);
+            return runTests(testFileName, studentId);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContext);
         }
     }
 
-    private List<TestResult> runTests(String classFileName, String studentId) throws ClassNotFoundException {
-        LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request();
+    private List<TestResult> runTests(String testFileName, String studentId) throws ClassNotFoundException {
+        var builder = LauncherDiscoveryRequestBuilder.request();
         try {
-            builder.selectors(selectClass(classLoader.loadClass(classFileName)));
+            builder.selectors(selectClass(classLoader.loadClass(testFileName)));
         } catch (NoClassDefFoundError e) {
-            String classBinaryName = getClassBinaryName(e.getMessage());
-            byte[] data = classLoader.getClassDataForKey(classFileName);
-            classLoader.deleteClassData(classFileName);
-            classLoader.addClassData(classBinaryName, data);
-            builder.selectors(selectClass(classLoader.loadClass(classBinaryName)));
+            // Trick to avoid NoClassDefFoundError if the test is in a package
+            String testClassBinaryName = getClassBinaryName(e.getMessage());
+            classLoader.changeClassDataName(testFileName, testClassBinaryName);
+            builder.selectors(selectClass(classLoader.loadClass(testClassBinaryName)));
         }
-
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
-
-        Launcher launcher = LauncherFactory.create();
-        LauncherDiscoveryRequest launcherDiscoveryRequest = builder.build();
+        var launcher = LauncherFactory.create();
+        var launcherDiscoveryRequest = builder.build();
         var unitTestListener = new UnitTestListener(studentId);
         launcher.registerTestExecutionListeners(unitTestListener);
         launcher.execute(launcherDiscoveryRequest);
-
         return unitTestListener.getTestResults();
     }
 
-    private static String getClassBinaryName(String errorMsg){
-
-        // Start and end index of cutting
-
+    // Trick to find binary name with NoClassDefFoundError error msg
+    private String getClassBinaryName(String errorMsg) {
         int endIndex = errorMsg.indexOf(" ");
-
-        // Let's save a substring
         String classPackage = errorMsg.substring(0, endIndex);
-
-        // Replace char '/' to '.'
         classPackage = classPackage.replace('/', '.');
-
         return classPackage;
     }
 }

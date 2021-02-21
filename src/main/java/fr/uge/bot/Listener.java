@@ -1,4 +1,4 @@
-package fr.uge;
+package fr.uge.bot;
 
 import fr.uge.bot.command.CommandManager;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;

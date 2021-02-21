@@ -12,6 +12,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,14 +54,21 @@ public class UnitTestBot {
 //            return;
 //        }
 
-        byte[] data = CompileFileToTest.compile(file);
+        Map<String, byte[]> data = CompileFileToTest.compile(file);
+        System.out.println(data.toString());
         if (data == null) {
             System.out.println("NSM");
         }
 
+        List<String> javaClassToLoad = new ArrayList<>();
+        var currentClassLoader = testClassLoaders.get(expectedTestFileName);
+        for (Map.Entry<String, byte[]> entry : data.entrySet()) {
+            javaClassToLoad.add(entry.getKey());
+            currentClassLoader.addClassData(entry.getKey(), entry.getValue());
+        }
+
         try {
-            testClassLoaders.get(expectedTestFileName).addClassData(fileName, data);
-            TestRunner testRunner = new TestRunner(testClassLoaders.get(expectedTestFileName), fileName);
+            TestRunner testRunner = new TestRunner(currentClassLoader, javaClassToLoad);
             testResults = testRunner.run(expectedTestFileName, studentId);
             testResults.forEach(testResult -> database.insertTestResultBean(testResult));
         } catch (ClassNotFoundException e) {

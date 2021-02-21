@@ -18,9 +18,15 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 public class TestRunner {
     private final ByteClassLoader classLoader;
 
-    public TestRunner(ByteClassLoader classLoader, String javaCompiledFileToLoad) throws MalformedURLException, ClassNotFoundException {
+    public TestRunner(ByteClassLoader classLoader, List<String> javaCompiledFileToLoad) throws MalformedURLException, ClassNotFoundException {
         this.classLoader = classLoader;
-        classLoader.loadClass(javaCompiledFileToLoad);
+        javaCompiledFileToLoad.forEach(load -> {
+            try {
+                classLoader.loadClass(load);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public List<TestResult> run(String classFileName, String studentId) throws ClassNotFoundException {
@@ -39,6 +45,9 @@ public class TestRunner {
             builder.selectors(selectClass(classLoader.loadClass(classFileName)));
         } catch (NoClassDefFoundError e) {
             String classBinaryName = getClassBinaryName(e.getMessage());
+            byte[] data = classLoader.getClassDataForKey(classFileName);
+            classLoader.deleteClassData(classFileName);
+            classLoader.addClassData(classBinaryName, data);
             builder.selectors(selectClass(classLoader.loadClass(classBinaryName)));
         }
 

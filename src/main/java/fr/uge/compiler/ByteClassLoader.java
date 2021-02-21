@@ -14,6 +14,7 @@ public class ByteClassLoader extends ClassLoader {
     @Override
     public Class<?> findClass(String name) throws ClassNotFoundException {
         byte[] data = classData.get(name);
+        System.out.println(classData.toString());
         if (data != null) {
             return defineClass(name, data, 0, data.length);
         } else {
@@ -27,5 +28,9 @@ public class ByteClassLoader extends ClassLoader {
 
     public void deleteClassData(String name) {
         classData.remove(name);
+    }
+
+    public byte[] getClassDataForKey(String key) {
+        return classData.get(key);
     }
 }

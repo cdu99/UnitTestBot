@@ -41,9 +41,6 @@ public class UnitTestBot {
     }
 
     public void addUnitTest(String name, byte[] testFileData, MessageReceivedEvent event) {
-        if (testData.containsKey(name)) {
-            testData.remove(name);
-        }
         testData.put(name, testFileData);
         testLifetime.put(name, testDeletionScheduledExecutor
                 .schedule(new TestDeletionSchedule(name, event), DEFAULT_LIFETIME, TimeUnit.SECONDS));

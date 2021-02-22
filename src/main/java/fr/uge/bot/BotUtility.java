@@ -41,7 +41,7 @@ public class BotUtility {
     }
 
     public static void sendNoAvailableTestForNowMessage(MessageReceivedEvent event, String fileName) {
-        event.getChannel().sendMessage(":x: No test available for `" + fileName + "`").queue();
+        event.getChannel().sendMessage(":x: No test available for **" + fileName + "**").queue();
     }
 
     public static void sendErrorDuringTestMessage(MessageReceivedEvent event) {
@@ -50,11 +50,11 @@ public class BotUtility {
     }
 
     public static void sendErrorTestFileNotCorrectMessage(MessageReceivedEvent event, String testFileName) {
-        event.getChannel().sendMessage(":x: **ERROR** Something is wrong with `"
-                + testFileName + "` :rotating_light:").queue();
+        event.getChannel().sendMessage(":x: **ERROR** Something is wrong with **"
+                + testFileName + "** :rotating_light:").queue();
     }
 
     public static void sendNewTestNotification(MessageReceivedEvent event, String testName) {
-        event.getChannel().sendMessage(":mega: `"+ testName +"` is available").queue();
+        event.getChannel().sendMessage(":mega: **"+ testName +"** is available").queue();
     }
 }

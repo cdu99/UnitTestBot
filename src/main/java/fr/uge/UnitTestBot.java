@@ -41,6 +41,15 @@ public class UnitTestBot {
         testData.put(name, testFileData);
     }
 
+    public boolean removeUnitTest(String name) {
+        if (testData.containsKey(name)) {
+            testData.remove(name);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void compileAndTest(File file, MessageReceivedEvent event) throws IOException {
         String fileName = file.getName().split("\\.")[0];
         String expectedTestFileName = fileName + "Test";

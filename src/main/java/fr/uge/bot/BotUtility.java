@@ -67,4 +67,13 @@ public class BotUtility {
     public static void sendFailToRemoveTestMessage(MessageReceivedEvent event, String testToRemove) {
         event.getChannel().sendMessage(":x: **FAIL** to remove **" + testToRemove + "**").queue();
     }
+
+    public static void sendRedefiningLifetimeMessage(String name, MessageReceivedEvent event, int newLifetime) {
+        event.getChannel().sendMessage(":white_check_mark: lifetime for **"
+                + name + "** has been set to **" + newLifetime + "** seconds").queue();
+    }
+
+    public static void sendTestDoesNotExist(String name, MessageReceivedEvent event) {
+        event.getChannel().sendMessage(":x: **" + name + "** has already been removed").queue();
+    }
 }

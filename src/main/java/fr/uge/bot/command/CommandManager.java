@@ -12,6 +12,7 @@ public class CommandManager {
         addCommand(new UnitTestCommand());
         addCommand(new TestCommand());
         addCommand(new RemoveCommand());
+        addCommand(new LifetimeCommand());
     }
 
     private void addCommand(Command c) {

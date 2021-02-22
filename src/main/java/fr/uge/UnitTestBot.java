@@ -19,7 +19,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class UnitTestBot {
-    private static final int DEFAULT_LIFETIME = 10;
+    private static final int DEFAULT_LIFETIME = 60;
     private final Map<String, byte[]> testData = new HashMap<>();
     private final Map<String, ScheduledFuture<?>> testLifetime = new HashMap<>();
     private final Database database;
@@ -112,6 +112,18 @@ public class UnitTestBot {
 
     private void addTestResultsToDatabase(List<TestResult> testResults) {
         testResults.forEach(database::insertTestResultBean);
+    }
+
+    public void redefineLifetime(String testToRedefineLifetime, int newLifetime, MessageReceivedEvent event) {
+        var schedule = testLifetime.get(testToRedefineLifetime);
+        if (schedule == null) {
+            BotUtility.sendTestDoesNotExist(testToRedefineLifetime, event);
+            return;
+        }
+        schedule.cancel(false);
+        testLifetime.put(testToRedefineLifetime, testDeletionScheduledExecutor
+                .schedule(new TestDeletionSchedule(testToRedefineLifetime, event), newLifetime, TimeUnit.SECONDS));
+        BotUtility.sendRedefiningLifetimeMessage(testToRedefineLifetime, event, newLifetime);
     }
 
     private class TestDeletionSchedule implements Runnable {

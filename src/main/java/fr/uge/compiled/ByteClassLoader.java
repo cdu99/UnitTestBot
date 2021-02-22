@@ -12,7 +12,7 @@ public class ByteClassLoader extends ClassLoader {
     }
 
     @Override
-    public Class<?> findClass(String name) throws ClassNotFoundException {
+    public Class<?> findClass(String name) throws ClassNotFoundException, ClassFormatError {
         byte[] data = classData.get(name);
         if (data != null) {
             return defineClass(name, data, 0, data.length);

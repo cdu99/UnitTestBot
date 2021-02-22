@@ -46,7 +46,11 @@ public class BotUtility {
 
     public static void sendErrorDuringTestMessage(MessageReceivedEvent event) {
         event.getChannel().sendMessage(":x: <@" + event.getAuthor().getId() +
-                ">  **ERROR** trying to run tests on your file. " +
-                "Please verify if your file is correct :rotating_light:").queue();
+                ">  **ERROR** Please verify if your file is correct :rotating_light:").queue();
+    }
+
+    public static void sendErrorTestFileNotCorrectMessage(MessageReceivedEvent event, String testFileName) {
+        event.getChannel().sendMessage(":x: **ERROR** Something is wrong with `"
+                + testFileName + "` :rotating_light:").queue();
     }
 }

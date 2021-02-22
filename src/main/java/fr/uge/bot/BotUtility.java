@@ -53,4 +53,8 @@ public class BotUtility {
         event.getChannel().sendMessage(":x: **ERROR** Something is wrong with `"
                 + testFileName + "` :rotating_light:").queue();
     }
+
+    public static void sendNewTestNotification(MessageReceivedEvent event, String testName) {
+        event.getChannel().sendMessage(":mega: `"+ testName +"` is available").queue();
+    }
 }

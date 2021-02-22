@@ -53,6 +53,8 @@ public class UnitTestBot {
     public void removeUnitTest(String name, MessageReceivedEvent event) {
         if (testData.containsKey(name)) {
             testData.remove(name);
+            testLifetime.get(name).cancel(false);
+            testLifetime.remove(name);
             BotUtility.sendSuccessfullyRemovedTest(event, name);
         } else {
             BotUtility.sendFailToRemoveTestMessage(event, name);

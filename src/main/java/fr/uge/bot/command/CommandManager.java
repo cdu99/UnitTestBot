@@ -11,6 +11,8 @@ public class CommandManager {
     public CommandManager() {
         addCommand(new UnitTestCommand());
         addCommand(new TestCommand());
+        addCommand(new RemoveCommand());
+        addCommand(new LifetimeCommand());
     }
 
     private void addCommand(Command c) {
@@ -20,7 +22,7 @@ public class CommandManager {
     }
 
     public void run(MessageReceivedEvent event) {
-        String message = event.getMessage().getContentRaw().toLowerCase();
+        String message = event.getMessage().getContentRaw().toLowerCase().split(" ", 2)[0];
 
         if (!message.startsWith("!")) {
             return;

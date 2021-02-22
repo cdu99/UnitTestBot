@@ -41,7 +41,7 @@ public class BotUtility {
     }
 
     public static void sendNoAvailableTestForNowMessage(MessageReceivedEvent event, String fileName) {
-        event.getChannel().sendMessage(":x: No test available for `" + fileName + "`").queue();
+        event.getChannel().sendMessage(":x: No test available for **" + fileName + "**").queue();
     }
 
     public static void sendErrorDuringTestMessage(MessageReceivedEvent event) {
@@ -50,11 +50,30 @@ public class BotUtility {
     }
 
     public static void sendErrorTestFileNotCorrectMessage(MessageReceivedEvent event, String testFileName) {
-        event.getChannel().sendMessage(":x: **ERROR** Something is wrong with `"
-                + testFileName + "` :rotating_light:").queue();
+        event.getChannel().sendMessage(":x: **ERROR** Something is wrong with **"
+                + testFileName + "** :rotating_light:").queue();
     }
 
-    public static void sendNewTestNotification(MessageReceivedEvent event, String testName) {
-        event.getChannel().sendMessage(":mega: `"+ testName +"` is available").queue();
+    public static void sendNewTestNotification(MessageReceivedEvent event, String testName, int lifetime) {
+        event.getChannel().sendMessage(":mega: **" + testName
+                + "** is available for **" + lifetime + "** seconds").queue();
+    }
+
+    public static void sendSuccessfullyRemovedTest(MessageReceivedEvent event, String testToRemove) {
+        event.getChannel().sendMessage(":white_check_mark: **"
+                + testToRemove + "** has been successfully removed").queue();
+    }
+
+    public static void sendFailToRemoveTestMessage(MessageReceivedEvent event, String testToRemove) {
+        event.getChannel().sendMessage(":x: **FAIL** to remove **" + testToRemove + "**").queue();
+    }
+
+    public static void sendRedefiningLifetimeMessage(String name, MessageReceivedEvent event, int newLifetime) {
+        event.getChannel().sendMessage(":white_check_mark: lifetime for **"
+                + name + "** has been set to **" + newLifetime + "** seconds").queue();
+    }
+
+    public static void sendTestDoesNotExist(String name, MessageReceivedEvent event) {
+        event.getChannel().sendMessage(":x: **" + name + "** has already been removed").queue();
     }
 }

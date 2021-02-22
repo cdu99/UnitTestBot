@@ -11,34 +11,51 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class UnitTestBot {
+    private static final int DEFAULT_LIFETIME = 60;
     private final Map<String, byte[]> testData = new HashMap<>();
+    private final Map<String, ScheduledFuture<?>> testLifetime = new HashMap<>();
     private final Database database;
+    private final ScheduledExecutorService testDeletionScheduledExecutor;
 
     private UnitTestBot() {
         database = new Database();
         database.createTable();
+        testDeletionScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
     }
 
-    private static UnitTestBot INSTANCE = null;
+    private static UnitTestBot instance = null;
 
     public static synchronized UnitTestBot getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new UnitTestBot();
+        if (instance == null) {
+            instance = new UnitTestBot();
         }
-        return INSTANCE;
+        return instance;
     }
 
-    public void addUnitTest(String name, byte[] testFileData) {
+    public void addUnitTest(String name, byte[] testFileData, MessageReceivedEvent event) {
+        testData.put(name, testFileData);
+        testLifetime.put(name, testDeletionScheduledExecutor
+                .schedule(new TestDeletionSchedule(name, event), DEFAULT_LIFETIME, TimeUnit.SECONDS));
+        BotUtility.sendNewTestNotification(event, name.split("\\.")[0], DEFAULT_LIFETIME);
+    }
+
+    public void removeUnitTest(String name, MessageReceivedEvent event) {
         if (testData.containsKey(name)) {
             testData.remove(name);
+            testLifetime.get(name).cancel(false);
+            testLifetime.remove(name);
+            BotUtility.sendSuccessfullyRemovedTest(event, name);
+        } else {
+            BotUtility.sendFailToRemoveTestMessage(event, name);
         }
-        testData.put(name, testFileData);
     }
 
     public void compileAndTest(File file, MessageReceivedEvent event) throws IOException {
@@ -92,6 +109,34 @@ public class UnitTestBot {
 
     private void addTestResultsToDatabase(List<TestResult> testResults) {
         testResults.forEach(database::insertTestResultBean);
+    }
+
+    public void redefineLifetime(String testToRedefineLifetime, int newLifetime, MessageReceivedEvent event) {
+        var schedule = testLifetime.get(testToRedefineLifetime);
+        if (schedule == null) {
+            BotUtility.sendTestDoesNotExist(testToRedefineLifetime, event);
+            return;
+        }
+        schedule.cancel(false);
+        testLifetime.put(testToRedefineLifetime, testDeletionScheduledExecutor
+                .schedule(new TestDeletionSchedule(testToRedefineLifetime, event), newLifetime, TimeUnit.SECONDS));
+        BotUtility.sendRedefiningLifetimeMessage(testToRedefineLifetime, event, newLifetime);
+    }
+
+    private class TestDeletionSchedule implements Runnable {
+        private String testScheduledToBeDeleted;
+        private MessageReceivedEvent event;
+
+        public TestDeletionSchedule(String name, MessageReceivedEvent event) {
+            Objects.requireNonNull(name);
+            this.testScheduledToBeDeleted = name;
+            this.event = event;
+        }
+
+        @Override
+        public void run() {
+            removeUnitTest(testScheduledToBeDeleted, event);
+        }
     }
 }
 

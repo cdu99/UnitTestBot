@@ -4,7 +4,7 @@ import fr.uge.UnitTestBot;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class RemoveCommand implements Command{
+public class RemoveCommand implements Command {
 
     @Override
     public void execute(MessageReceivedEvent event) {
@@ -12,12 +12,7 @@ public class RemoveCommand implements Command{
 
         try {
             String testToRemove = event.getMessage().getContentRaw().split(" ", 2)[1];
-            if (UnitTestBot.getInstance().removeUnitTest(testToRemove)) {
-                channel.sendMessage(":white_check_mark: **"
-                        + testToRemove + "** has been successfully removed").queue();
-            } else {
-                channel.sendMessage(":x: **FAIL** to remove **" + testToRemove + "**").queue();
-            }
+            UnitTestBot.getInstance().removeUnitTest(testToRemove, event);
         } catch (ArrayIndexOutOfBoundsException e) {
             channel.sendMessage(":x: **!remove** must be use like so: `!remove <test_to_remove>`").queue();
             throw new AssertionError(e);

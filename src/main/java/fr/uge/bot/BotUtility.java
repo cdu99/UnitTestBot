@@ -54,7 +54,17 @@ public class BotUtility {
                 + testFileName + "** :rotating_light:").queue();
     }
 
-    public static void sendNewTestNotification(MessageReceivedEvent event, String testName) {
-        event.getChannel().sendMessage(":mega: **"+ testName +"** is available").queue();
+    public static void sendNewTestNotification(MessageReceivedEvent event, String testName, int lifetime) {
+        event.getChannel().sendMessage(":mega: **" + testName
+                + "** is available for **" + lifetime + "** seconds").queue();
+    }
+
+    public static void sendSuccessfullyRemovedTest(MessageReceivedEvent event, String testToRemove) {
+        event.getChannel().sendMessage(":white_check_mark: **"
+                + testToRemove + "** has been successfully removed").queue();
+    }
+
+    public static void sendFailToRemoveTestMessage(MessageReceivedEvent event, String testToRemove) {
+        event.getChannel().sendMessage(":x: **FAIL** to remove **" + testToRemove + "**").queue();
     }
 }

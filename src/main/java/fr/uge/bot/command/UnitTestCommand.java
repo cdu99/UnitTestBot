@@ -1,6 +1,7 @@
 package fr.uge.bot.command;
 
 import fr.uge.UnitTestBot;
+import fr.uge.bot.BotUtility;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -31,6 +32,7 @@ public class UnitTestCommand implements Command {
                 return null;
             });
             addUnitTest(attachment, fileName);
+            BotUtility.sendNewTestNotification(event, fileName.split("\\.")[0]);
         } else {
             channel.sendMessage(":x: Please attach a compiled JUnit test file :gear:").queue();
         }
@@ -44,8 +46,6 @@ public class UnitTestCommand implements Command {
     private void addUnitTest(CompletableFuture<InputStream> compiledTestFileInputStream, String fileName) {
         Objects.requireNonNull(compiledTestFileInputStream);
         try {
-            // TODO
-            // Discord message
             byte[] testData = compiledTestFileInputStream.get().readAllBytes();
             UnitTestBot.getInstance().addUnitTest(fileName.split("\\.")[0], testData);
         } catch (ExecutionException | IOException e) {

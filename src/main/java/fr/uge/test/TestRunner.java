@@ -48,6 +48,9 @@ public class TestRunner {
             String testClassBinaryName = getClassBinaryName(e.getMessage());
             classLoader.changeClassDataName(testFileName, testClassBinaryName);
             builder.selectors(selectClass(classLoader.loadClass(testClassBinaryName)));
+        } catch (ClassFormatError e) {
+            BotUtility.sendErrorTestFileNotCorrectMessage(event, testFileName);
+            throw new AssertionError(e);
         }
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
         var launcher = LauncherFactory.create();

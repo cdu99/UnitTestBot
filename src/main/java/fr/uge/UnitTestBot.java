@@ -19,39 +19,30 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class UnitTestBot {
-    private static final int DEFAULT_LIFETIME = 60;
-    private final Map<String, byte[]> testData = new HashMap<>();
-    private final Map<String, ScheduledFuture<?>> testLifetime = new HashMap<>();
+    private static final int DEFAULT_LIFETIME = 300;
+    private final Map<String, byte[]> tests = new HashMap<>();
+    private final Map<String, ScheduledFuture<?>> testsLifetime = new HashMap<>();
     private final Database database;
     private final ScheduledExecutorService testDeletionScheduledExecutor;
 
-    private UnitTestBot() {
+    public UnitTestBot() {
         database = new Database();
         database.createTable();
         testDeletionScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
     }
 
-    private static UnitTestBot instance = null;
-
-    public static synchronized UnitTestBot getInstance() {
-        if (instance == null) {
-            instance = new UnitTestBot();
-        }
-        return instance;
-    }
-
-    public void addUnitTest(String name, byte[] testFileData, MessageReceivedEvent event) {
-        testData.put(name, testFileData);
-        testLifetime.put(name, testDeletionScheduledExecutor
+    public void addTest(String name, byte[] testData, MessageReceivedEvent event) {
+        tests.put(name, testData);
+        testsLifetime.put(name, testDeletionScheduledExecutor
                 .schedule(new TestDeletionSchedule(name, event), DEFAULT_LIFETIME, TimeUnit.SECONDS));
         BotUtility.sendNewTestNotification(event, name.split("\\.")[0], DEFAULT_LIFETIME);
     }
 
-    public void removeUnitTest(String name, MessageReceivedEvent event) {
-        if (testData.containsKey(name)) {
-            testData.remove(name);
-            testLifetime.get(name).cancel(false);
-            testLifetime.remove(name);
+    public void removeTest(String name, MessageReceivedEvent event) {
+        if (tests.containsKey(name)) {
+            tests.remove(name);
+            testsLifetime.get(name).cancel(false);
+            testsLifetime.remove(name);
             BotUtility.sendSuccessfullyRemovedTest(event, name);
         } else {
             BotUtility.sendFailToRemoveTestMessage(event, name);
@@ -59,13 +50,13 @@ public class UnitTestBot {
     }
 
     public void compileAndTest(File file, MessageReceivedEvent event) throws IOException {
-        String fileName = file.getName().split("\\.")[0];
-        String expectedTestFileName = fileName + "Test";
+        String name = file.getName().split("\\.")[0];
+        String expectedTestName = name + "Test";
 
         // Check if test exist
-        if (!testData.containsKey(expectedTestFileName)) {
+        if (!tests.containsKey(expectedTestName)) {
             Files.delete(file.getAbsoluteFile().toPath());
-            BotUtility.sendNoAvailableTestForNowMessage(event, fileName);
+            BotUtility.sendNoAvailableTestMessage(event, name);
             return;
         }
         // Compile
@@ -75,18 +66,18 @@ public class UnitTestBot {
             return;
         }
         // Create class loader and add all required data to load
-        var currentClassLoader = createTestClassLoader(expectedTestFileName);
+        var classLoader = createClassLoader(expectedTestName);
         List<String> classesToLoad = new ArrayList<>();
         for (Map.Entry<String, byte[]> entry : compiled.entrySet()) {
             classesToLoad.add(entry.getKey());
-            currentClassLoader.addClassData(entry.getKey(), entry.getValue());
+            classLoader.addClassData(entry.getKey(), entry.getValue());
         }
         // Run the test with class loader
-        var testRunner = new TestRunner(currentClassLoader, classesToLoad);
-        List<TestResult> testResults = testing(testRunner, expectedTestFileName, event);
+        var testRunner = new TestRunner(classLoader, classesToLoad);
+        List<TestResult> testResults = testing(testRunner, expectedTestName, event);
         // Add results to database
         addTestResultsToDatabase(testResults);
-        BotUtility.sendEmbedTestResult(event, testResults, fileName);
+        BotUtility.sendEmbedTestResult(event, testResults, name);
     }
 
     private Map<String, byte[]> compileSource(File file) throws IOException {
@@ -94,8 +85,8 @@ public class UnitTestBot {
         return compiler.compile();
     }
 
-    private ByteClassLoader createTestClassLoader(String name) {
-        var data = testData.get(name);
+    private ByteClassLoader createClassLoader(String name) {
+        var data = tests.get(name);
         return new ByteClassLoader(name, data);
     }
 
@@ -111,31 +102,31 @@ public class UnitTestBot {
         testResults.forEach(database::insertTestResultBean);
     }
 
-    public void redefineLifetime(String testToRedefineLifetime, int newLifetime, MessageReceivedEvent event) {
-        var schedule = testLifetime.get(testToRedefineLifetime);
+    public void redefineLifetime(String testName, int newLifetime, MessageReceivedEvent event) {
+        var schedule = testsLifetime.get(testName);
         if (schedule == null) {
-            BotUtility.sendTestDoesNotExist(testToRedefineLifetime, event);
+            BotUtility.sendTestAlreadyRemovedMessage(testName, event);
             return;
         }
         schedule.cancel(false);
-        testLifetime.put(testToRedefineLifetime, testDeletionScheduledExecutor
-                .schedule(new TestDeletionSchedule(testToRedefineLifetime, event), newLifetime, TimeUnit.SECONDS));
-        BotUtility.sendRedefiningLifetimeMessage(testToRedefineLifetime, event, newLifetime);
+        testsLifetime.put(testName, testDeletionScheduledExecutor
+                .schedule(new TestDeletionSchedule(testName, event), newLifetime, TimeUnit.SECONDS));
+        BotUtility.sendRedefiningLifetimeMessage(testName, event, newLifetime);
     }
 
     private class TestDeletionSchedule implements Runnable {
-        private String testScheduledToBeDeleted;
+        private String testName;
         private MessageReceivedEvent event;
 
         public TestDeletionSchedule(String name, MessageReceivedEvent event) {
             Objects.requireNonNull(name);
-            this.testScheduledToBeDeleted = name;
+            this.testName = name;
             this.event = event;
         }
 
         @Override
         public void run() {
-            removeUnitTest(testScheduledToBeDeleted, event);
+            removeTest(testName, event);
         }
     }
 }

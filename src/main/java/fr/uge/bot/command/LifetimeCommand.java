@@ -4,7 +4,12 @@ import fr.uge.UnitTestBot;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class LifetimeCommand implements Command{
+public class LifetimeCommand implements Command {
+    private final UnitTestBot unitTestBot;
+
+    public LifetimeCommand(UnitTestBot unitTestBot) {
+        this.unitTestBot = unitTestBot;
+    }
 
     @Override
     public void execute(MessageReceivedEvent event) {
@@ -12,8 +17,8 @@ public class LifetimeCommand implements Command{
 
         try {
             String[] format = event.getMessage().getContentRaw().split(" ", 3);
-            UnitTestBot.getInstance().redefineLifetime(format[1], Integer.parseInt(format[2]), event);
-        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e){
+            unitTestBot.redefineLifetime(format[1], Integer.parseInt(format[2]), event);
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             channel.sendMessage(":x: **!lifetime** must be use like so: `!remove <test> <new_lifetime>`").queue();
             throw new AssertionError(e);
         }

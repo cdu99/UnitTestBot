@@ -16,11 +16,11 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 public class TestRunner {
     private final ByteClassLoader classLoader;
 
-    public TestRunner(ByteClassLoader classLoader, List<String> javaCompiledFileToLoad) {
+    public TestRunner(ByteClassLoader classLoader, List<String> compiledFilesToLoad) {
         Objects.requireNonNull(classLoader);
-        Objects.requireNonNull(javaCompiledFileToLoad);
+        Objects.requireNonNull(compiledFilesToLoad);
         this.classLoader = classLoader;
-        javaCompiledFileToLoad.forEach(compiledFile -> {
+        compiledFilesToLoad.forEach(compiledFile -> {
             try {
                 classLoader.loadClass(compiledFile);
             } catch (ClassNotFoundException e) {
@@ -29,27 +29,27 @@ public class TestRunner {
         });
     }
 
-    public List<TestResult> run(String testFileName, MessageReceivedEvent event) throws ClassNotFoundException {
+    public List<TestResult> run(String testName, MessageReceivedEvent event) throws ClassNotFoundException {
         var oldContext = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);
         try {
-            return runTests(testFileName, event);
+            return runTests(testName, event);
         } finally {
             Thread.currentThread().setContextClassLoader(oldContext);
         }
     }
 
-    private List<TestResult> runTests(String testFileName, MessageReceivedEvent event) throws ClassNotFoundException {
+    private List<TestResult> runTests(String testName, MessageReceivedEvent event) throws ClassNotFoundException {
         var builder = LauncherDiscoveryRequestBuilder.request();
         try {
-            builder.selectors(selectClass(classLoader.loadClass(testFileName)));
+            builder.selectors(selectClass(classLoader.loadClass(testName)));
         } catch (NoClassDefFoundError e) {
             // Trick to avoid NoClassDefFoundError if the test is in a package
-            String testClassBinaryName = getClassBinaryName(e.getMessage());
-            classLoader.changeClassDataName(testFileName, testClassBinaryName);
-            builder.selectors(selectClass(classLoader.loadClass(testClassBinaryName)));
+            String testBinaryName = getClassBinaryName(e.getMessage());
+            classLoader.changeClassDataName(testName, testBinaryName);
+            builder.selectors(selectClass(classLoader.loadClass(testBinaryName)));
         } catch (ClassFormatError e) {
-            BotUtility.sendErrorTestFileNotCorrectMessage(event, testFileName);
+            BotUtility.sendErrorTestFileNotCorrectMessage(event, testName);
             throw new AssertionError(e);
         }
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
@@ -70,8 +70,8 @@ public class TestRunner {
     // Trick to find binary name with NoClassDefFoundError error msg
     private String getClassBinaryName(String errorMsg) {
         int endIndex = errorMsg.indexOf(" ");
-        String classPackage = errorMsg.substring(0, endIndex);
-        classPackage = classPackage.replace('/', '.');
-        return classPackage;
+        String classBinaryName = errorMsg.substring(0, endIndex);
+        classBinaryName = classBinaryName.replace('/', '.');
+        return classBinaryName;
     }
 }

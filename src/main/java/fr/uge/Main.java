@@ -9,11 +9,13 @@ import javax.security.auth.login.LoginException;
 
 public class Main {
     public static void main(String[] args) throws LoginException {
+        UnitTestBot unitTestBot = new UnitTestBot();
+
         BasicConfigurator.configure();
 
         JDABuilder.createDefault("Nzk1NjA4NDAyODAwOTM0OTgz.X_L2EA.XWr5S82moiVmdrF-PvZDBhMX-NI")
                 .setActivity(Activity.streaming("League of Legends", "https://www.youtube.com/watch?v=dQw4w9WgXcQ"))
-                .addEventListeners(new Listener())
+                .addEventListeners(new Listener(unitTestBot))
                 .build();
     }
 }

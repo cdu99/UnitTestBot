@@ -1,5 +1,6 @@
 package fr.uge.bot.command;
 
+import fr.uge.UnitTestBot;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.HashMap;
@@ -8,11 +9,11 @@ import java.util.Map;
 public class CommandManager {
     private final Map<String, Command> commands = new HashMap<>();
 
-    public CommandManager() {
-        addCommand(new UnitTestCommand());
-        addCommand(new TestCommand());
-        addCommand(new RemoveCommand());
-        addCommand(new LifetimeCommand());
+    public CommandManager(UnitTestBot unitTestBot) {
+        addCommand(new UnitTestCommand(unitTestBot));
+        addCommand(new TestCommand(unitTestBot));
+        addCommand(new RemoveCommand(unitTestBot));
+        addCommand(new LifetimeCommand(unitTestBot));
     }
 
     private void addCommand(Command c) {

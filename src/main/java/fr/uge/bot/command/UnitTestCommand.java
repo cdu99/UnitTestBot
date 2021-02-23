@@ -13,6 +13,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class UnitTestCommand implements Command {
+    private final UnitTestBot unitTestBot;
+
+    public UnitTestCommand(UnitTestBot unitTestBot) {
+        this.unitTestBot = unitTestBot;
+    }
 
     @Override
     public void execute(MessageReceivedEvent event) {
@@ -30,7 +35,7 @@ public class UnitTestCommand implements Command {
                 error.printStackTrace();
                 return null;
             });
-            addUnitTest(attachment, fileName, event);
+            addTest(attachment, fileName, event);
         } else {
             channel.sendMessage(":x: Please attach a compiled JUnit test file :gear:").queue();
         }
@@ -41,11 +46,11 @@ public class UnitTestCommand implements Command {
         return "!unittest";
     }
 
-    private void addUnitTest(CompletableFuture<InputStream> compiledTestFileInputStream, String fileName, MessageReceivedEvent event) {
-        Objects.requireNonNull(compiledTestFileInputStream);
+    private void addTest(CompletableFuture<InputStream> compiledTestData, String fileName, MessageReceivedEvent event) {
+        Objects.requireNonNull(compiledTestData);
         try {
-            byte[] testData = compiledTestFileInputStream.get().readAllBytes();
-            UnitTestBot.getInstance().addUnitTest(fileName.split("\\.")[0], testData, event);
+            byte[] testData = compiledTestData.get().readAllBytes();
+            unitTestBot.addTest(fileName.split("\\.")[0], testData, event);
         } catch (ExecutionException | IOException e) {
             throw new AssertionError(e);
         } catch (InterruptedException e) {

@@ -2,11 +2,14 @@ package fr.uge.compiled;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ByteClassLoader extends ClassLoader {
     private final Map<String, byte[]> classData = new HashMap<>();
 
     public ByteClassLoader(String name, byte[] data) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(data);
         // Test data
         addClassData(name, data);
     }

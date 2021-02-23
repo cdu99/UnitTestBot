@@ -19,7 +19,7 @@ public class LifetimeCommand implements Command {
             String[] format = event.getMessage().getContentRaw().split(" ", 3);
             unitTestBot.redefineLifetime(format[1], Integer.parseInt(format[2]), event);
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-            channel.sendMessage(":x: **!lifetime** must be use like so: `!lifetime <test> <new_lifetime>`").queue();
+            channel.sendMessage(":x: **!lifetime** must be use like so: `!remove <test> <new_lifetime>`").queue();
             throw new AssertionError(e);
         }
     }

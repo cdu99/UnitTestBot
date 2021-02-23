@@ -115,8 +115,8 @@ public class UnitTestBot {
     }
 
     private class TestDeletionSchedule implements Runnable {
-        private String testName;
-        private MessageReceivedEvent event;
+        private final String testName;
+        private final MessageReceivedEvent event;
 
         public TestDeletionSchedule(String name, MessageReceivedEvent event) {
             Objects.requireNonNull(name);

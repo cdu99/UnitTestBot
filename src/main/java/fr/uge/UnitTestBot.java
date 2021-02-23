@@ -19,30 +19,28 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class UnitTestBot {
-    private static final int DEFAULT_LIFETIME = 300;
-    private final Map<String, byte[]> tests = new HashMap<>();
-    private final Map<String, ScheduledFuture<?>> testsLifetime = new HashMap<>();
+    private static final int DEFAULT_LIFETIME = 60;
+    private final Map<String, Test> tests = new HashMap<>();
     private final Database database;
-    private final ScheduledExecutorService testDeletionScheduledExecutor;
+    private final ScheduledExecutorService executor;
 
     public UnitTestBot() {
         database = new Database();
         database.createTable();
-        testDeletionScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newSingleThreadScheduledExecutor();
     }
 
     public void addTest(String name, byte[] testData, MessageReceivedEvent event) {
-        tests.put(name, testData);
-        testsLifetime.put(name, testDeletionScheduledExecutor
+        var test = new Test(testData, executor
                 .schedule(new TestDeletionSchedule(name, event), DEFAULT_LIFETIME, TimeUnit.SECONDS));
+        tests.put(name, test);
         BotUtility.sendNewTestNotification(event, name.split("\\.")[0], DEFAULT_LIFETIME);
     }
 
     public void removeTest(String name, MessageReceivedEvent event) {
         if (tests.containsKey(name)) {
+            tests.get(name).getLifetime().cancel(false);
             tests.remove(name);
-            testsLifetime.get(name).cancel(false);
-            testsLifetime.remove(name);
             BotUtility.sendSuccessfullyRemovedTest(event, name);
         } else {
             BotUtility.sendFailToRemoveTestMessage(event, name);
@@ -86,7 +84,7 @@ public class UnitTestBot {
     }
 
     private ByteClassLoader createClassLoader(String name) {
-        var data = tests.get(name);
+        var data = tests.get(name).getData();
         return new ByteClassLoader(name, data);
     }
 
@@ -103,15 +101,37 @@ public class UnitTestBot {
     }
 
     public void redefineLifetime(String testName, int newLifetime, MessageReceivedEvent event) {
-        var schedule = testsLifetime.get(testName);
+        var schedule = tests.get(testName).getLifetime();
         if (schedule == null) {
             BotUtility.sendTestAlreadyRemovedMessage(testName, event);
             return;
         }
         schedule.cancel(false);
-        testsLifetime.put(testName, testDeletionScheduledExecutor
+        tests.get(testName).setLifetime(executor
                 .schedule(new TestDeletionSchedule(testName, event), newLifetime, TimeUnit.SECONDS));
         BotUtility.sendRedefiningLifetimeMessage(testName, event, newLifetime);
+    }
+
+    private class Test<V> {
+        private final byte[] data;
+        private ScheduledFuture<V> lifetime;
+
+        public Test(byte[] data, ScheduledFuture<V> lifetime) {
+            this.data = data;
+            this.lifetime = lifetime;
+        }
+
+        public ScheduledFuture<V> getLifetime() {
+            return lifetime;
+        }
+
+        public byte[] getData() {
+            return data;
+        }
+
+        public void setLifetime(ScheduledFuture<V> newLifetime) {
+            this.lifetime = newLifetime;
+        }
     }
 
     private class TestDeletionSchedule implements Runnable {

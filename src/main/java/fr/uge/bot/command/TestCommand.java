@@ -13,6 +13,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class TestCommand implements Command {
+    private final UnitTestBot unitTestBot;
+
+    public TestCommand(UnitTestBot unitTestBot) {
+        this.unitTestBot = unitTestBot;
+    }
 
     @Override
     public void execute(MessageReceivedEvent event) {
@@ -47,7 +52,7 @@ public class TestCommand implements Command {
     private void compileAndTest(CompletableFuture<File> fileToCompileAndTest, MessageReceivedEvent event) {
         Objects.requireNonNull(fileToCompileAndTest);
         try {
-            UnitTestBot.getInstance().compileAndTest(fileToCompileAndTest.get(), event);
+            unitTestBot.compileAndTest(fileToCompileAndTest.get(), event);
         } catch (ExecutionException | IOException e) {
             throw new AssertionError(e);
         } catch (InterruptedException ie) {

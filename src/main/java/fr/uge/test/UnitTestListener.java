@@ -13,7 +13,7 @@ import java.util.NoSuchElementException;
 
 public class UnitTestListener implements TestExecutionListener {
     private TestResult currentTestResult;
-    private List<TestResult> testResults;
+    private final List<TestResult> testResults = new ArrayList<>();
     private final String studentId;
 
     public UnitTestListener(String studentId) {
@@ -27,7 +27,6 @@ public class UnitTestListener implements TestExecutionListener {
     @Override
     public void testPlanExecutionStarted(TestPlan testPlan) {
         this.currentTestResult = new TestResult();
-        this.testResults = new ArrayList<>();
     }
 
     @Override

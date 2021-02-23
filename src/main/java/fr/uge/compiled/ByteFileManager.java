@@ -11,20 +11,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ByteFileManager extends ForwardingJavaFileManager<JavaFileManager> {
-    private Map<String, byte[]> classBytes;
+    private final Map<String, byte[]> classBytes;
 
-    protected ByteFileManager(JavaFileManager fileManager) {
+    public ByteFileManager(JavaFileManager fileManager) {
         super(fileManager);
         classBytes = new HashMap<>();
     }
 
     public Map<String, byte[]> getClassBytes() {
         return classBytes;
-    }
-
-    @Override
-    public void close() throws IOException {
-        classBytes = null;
     }
 
     @Override
@@ -43,9 +38,9 @@ public class ByteFileManager extends ForwardingJavaFileManager<JavaFileManager> 
     }
 
     private class ByteOutput extends SimpleJavaFileObject {
-        private String name;
+        private final String name;
 
-        ByteOutput(String name) throws URISyntaxException {
+        public ByteOutput(String name) throws URISyntaxException {
             super(new URI(name), Kind.CLASS);
             this.name = name;
         }

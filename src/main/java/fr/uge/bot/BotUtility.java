@@ -16,12 +16,11 @@ public class BotUtility {
         return "<@" + event.getAuthor().getId() + ">";
     }
 
+    // Limited to 25 fields. Messages (MessageBuilder) are limited to 2000 characters
     public static void sendEmbedTestResult(MessageReceivedEvent event, List<TestResult> testResults, String testedFile) {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle("Test result for `" + testedFile + "` :robot:");
         testResults.sort(Comparator.comparing(TestResult::getQuestion).thenComparing(TestResult::getTest));
-        // TODO
-        // Embed limited to 25 fields...
         testResults.forEach(testResult ->
                 eb.addField(testResult.toString(), testResultEmote(testResult.getResult()), true));
         eb.setColor(2438306);

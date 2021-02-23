@@ -23,17 +23,17 @@ public class UnitTestBot {
     private final Map<String, byte[]> tests = new HashMap<>();
     private final Map<String, ScheduledFuture<?>> testsLifetime = new HashMap<>();
     private final Database database;
-    private final ScheduledExecutorService testDeletionScheduledExecutor;
+    private final ScheduledExecutorService executor;
 
     public UnitTestBot() {
         database = new Database();
         database.createTable();
-        testDeletionScheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newSingleThreadScheduledExecutor();
     }
 
     public void addTest(String name, byte[] testData, MessageReceivedEvent event) {
         tests.put(name, testData);
-        testsLifetime.put(name, testDeletionScheduledExecutor
+        testsLifetime.put(name, executor
                 .schedule(new TestDeletionSchedule(name, event), DEFAULT_LIFETIME, TimeUnit.SECONDS));
         BotUtility.sendNewTestNotification(event, name.split("\\.")[0], DEFAULT_LIFETIME);
     }
@@ -109,7 +109,7 @@ public class UnitTestBot {
             return;
         }
         schedule.cancel(false);
-        testsLifetime.put(testName, testDeletionScheduledExecutor
+        testsLifetime.put(testName, executor
                 .schedule(new TestDeletionSchedule(testName, event), newLifetime, TimeUnit.SECONDS));
         BotUtility.sendRedefiningLifetimeMessage(testName, event, newLifetime);
     }

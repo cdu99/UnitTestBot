@@ -82,7 +82,11 @@ public class UnitTestBot {
 
     private Map<String, byte[]> compileSource(File file) throws IOException {
         Compiler compiler = new Compiler(file);
-        return compiler.compile();
+        try {
+            return compiler.compile();
+        } finally {
+            Files.delete(file.getAbsoluteFile().toPath());
+        }
     }
 
     private ByteClassLoader createClassLoader(String name) {

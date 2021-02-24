@@ -6,6 +6,7 @@ import java.util.Objects;
 
 public class TestResult {
     private String student;
+    private String test_file;
     private String question;
     private String test;
     private boolean result;
@@ -18,6 +19,16 @@ public class TestResult {
     public void setStudent(String student) {
         Objects.requireNonNull(student);
         this.student = student;
+    }
+
+    @ColumnName("test_file")
+    public String getTest_file() {
+        return test_file;
+    }
+
+    public void setTest_file(String test_file) {
+        Objects.requireNonNull(test_file);
+        this.test_file = test_file;
     }
 
     @ColumnName("question")

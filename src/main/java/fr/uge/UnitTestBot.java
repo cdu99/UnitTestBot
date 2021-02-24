@@ -118,6 +118,11 @@ public class UnitTestBot {
         BotUtility.sendRedefiningLifetimeMessage(testName, event, newLifetime);
     }
 
+    public List<TestResult> getTestResultsFromDatabase(String testName) {
+        // TOUDOU
+        return null;
+    }
+
     private class TestDeletionSchedule implements Runnable {
         private final String testName;
         private final MessageReceivedEvent event;

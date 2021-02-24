@@ -39,7 +39,6 @@ public class Compiler {
                 return null;
             }
         } finally {
-            Files.delete(fileToCompile.getAbsoluteFile().toPath());
             standardFileManager.close();
             fileManager.close();
         }

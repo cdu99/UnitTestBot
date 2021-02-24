@@ -2,6 +2,7 @@ package fr.uge.database;
 
 import org.jdbi.v3.core.Jdbi;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Database {
@@ -30,5 +31,15 @@ public class Database {
                 "(:student, :test_file, :question, :test, :result)")
                 .bindBean(testResult)
                 .execute());
+    }
+
+    public List<TestResult> getTestResultsForTest(String testFile) {
+        Objects.requireNonNull(testFile);
+        return jdbi.withHandle(handle ->
+                handle.createQuery("select * from test_result where " +
+                        "test_file = :test_file order by question , test")
+                .bind("test_file", testFile)
+                .mapToBean(TestResult.class)
+                .list());
     }
 }

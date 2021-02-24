@@ -14,6 +14,7 @@ public class CommandManager {
         addCommand(new TestCommand(unitTestBot));
         addCommand(new RemoveCommand(unitTestBot));
         addCommand(new LifetimeCommand(unitTestBot));
+        addCommand(new ResultCommand(unitTestBot));
     }
 
     private void addCommand(Command c) {

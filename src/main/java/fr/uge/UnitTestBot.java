@@ -6,6 +6,7 @@ import fr.uge.compiled.Compiler;
 import fr.uge.database.Database;
 import fr.uge.database.TestResult;
 import fr.uge.test.TestRunner;
+import fr.uge.xls.BuildTestResultXLS;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.io.File;
@@ -118,9 +119,15 @@ public class UnitTestBot {
         BotUtility.sendRedefiningLifetimeMessage(testName, event, newLifetime);
     }
 
-    public List<TestResult> getTestResultsFromDatabase(String testName) {
-        // TOUDOU
-        return null;
+    // WIP
+    public byte[] createTestResultXLS(String testName) throws IOException {
+        List<TestResult> testResults = getTestResultsFromDatabase(testName);
+        var xlsBuilder = new BuildTestResultXLS();
+        return xlsBuilder.build(testResults);
+    }
+
+    private List<TestResult> getTestResultsFromDatabase(String testName) {
+        return database.getTestResultsForTest(testName);
     }
 
     private class TestDeletionSchedule implements Runnable {

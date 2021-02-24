@@ -55,7 +55,7 @@ public class TestRunner {
         builder.configurationParameter("junit.jupiter.execution.parallel.enabled", "true");
         var launcher = LauncherFactory.create();
         var launcherDiscoveryRequest = builder.build();
-        var unitTestListener = new UnitTestListener(event.getAuthor().getAsTag());
+        var unitTestListener = new UnitTestListener(event.getAuthor().getAsTag(), testName);
         launcher.registerTestExecutionListeners(unitTestListener);
         try {
             launcher.execute(launcherDiscoveryRequest);

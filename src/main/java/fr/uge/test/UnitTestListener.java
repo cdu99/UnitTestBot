@@ -15,9 +15,11 @@ public class UnitTestListener implements TestExecutionListener {
     private TestResult currentTestResult;
     private final List<TestResult> testResults = new ArrayList<>();
     private final String studentId;
+    private final String test_file;
 
-    public UnitTestListener(String studentId) {
+    public UnitTestListener(String studentId, String test_file) {
         this.studentId = studentId;
+        this.test_file = test_file;
     }
 
     public List<TestResult> getTestResults() {
@@ -33,6 +35,7 @@ public class UnitTestListener implements TestExecutionListener {
     public void executionStarted(TestIdentifier testIdentifier) {
         if (testIdentifier.isTest()) {
             currentTestResult.setStudent(studentId);
+            currentTestResult.setTest_file(test_file);
             currentTestResult.setTest(testIdentifier.getDisplayName());
             try {
                 currentTestResult.setQuestion(testIdentifier.getTags().iterator().next().getName());

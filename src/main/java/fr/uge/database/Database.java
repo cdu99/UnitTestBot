@@ -12,28 +12,22 @@ public class Database {
         this.jdbi = Jdbi.create(UNIT_TEST_DATABSE);
     }
 
-    // TODO
-    // Add test name data
     public void createTable() {
         jdbi.useHandle(handle -> {
             handle.execute("drop table if exists test_result;");
             handle.execute("create table test_result(student String," +
+                    "test_file String," +
                     "question String," +
                     "test String," +
                     "result boolean);");
         });
     }
 
-    public void insertTestResult(String student, String question, String testName, boolean result) {
-        jdbi.useHandle(handle -> handle.execute("insert into test_result values(?, ?, ?, ?)"
-                , student, question, testName, result));
-    }
-
     public void insertTestResultBean(TestResult testResult) {
         Objects.requireNonNull(testResult);
         jdbi.useHandle(handle -> handle.createUpdate("insert into test_result " +
-                "(student, question, test, result) values " +
-                "(:student, :question, :test, :result)")
+                "(student, test_file, question, test, result) values " +
+                "(:student, :test_file, :question, :test, :result)")
                 .bindBean(testResult)
                 .execute());
     }

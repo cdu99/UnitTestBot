@@ -30,7 +30,6 @@ public class TestCommand implements Command {
                 channel.sendMessage(":x: Must be a Java file :hotsprings:").queue();
                 return;
             }
-            // TODO Not downloading to disk at all
             CompletableFuture<File> attachment = attachments.get(0)
                     .downloadToFile("src/main/resources/" + fileName);
             attachment.exceptionally(error -> {

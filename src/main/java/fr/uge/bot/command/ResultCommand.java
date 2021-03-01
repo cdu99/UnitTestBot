@@ -12,13 +12,13 @@ public class ResultCommand implements Command {
         this.unitTestBot = unitTestBot;
     }
 
-    // TODO WIP
     @Override
     public void execute(MessageReceivedEvent event) {
         String testName = event.getMessage().getContentRaw().split(" ", 2)[1];
         try {
             byte[] xls = unitTestBot.createTestResultXLS(testName);
-            event.getChannel().sendMessage("result").addFile(xls, "result.xls").queue();
+            event.getChannel().sendMessage(":clipboard: Test results for: **" + testName + "**")
+                    .addFile(xls, testName + "Result.xls").queue();
         } catch (IOException e) {
             throw new AssertionError(e);
         }

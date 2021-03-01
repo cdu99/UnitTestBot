@@ -119,9 +119,11 @@ public class UnitTestBot {
         BotUtility.sendRedefiningLifetimeMessage(testName, event, newLifetime);
     }
 
-    // TODO WIP
     public byte[] createTestResultXLS(String testName) throws IOException {
         List<TestResult> testResults = getTestResultsFromDatabase(testName);
+        if (testResults.isEmpty()) {
+            // TODO When pas de test result
+        }
         var xlsBuilder = new BuildTestResultXLS();
         return xlsBuilder.build(testResults);
     }

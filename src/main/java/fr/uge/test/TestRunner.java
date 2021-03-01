@@ -44,7 +44,7 @@ public class TestRunner {
         try {
             builder.selectors(selectClass(classLoader.loadClass(testName)));
         } catch (NoClassDefFoundError e) {
-            // Trick to avoid NoClassDefFoundError if the test is in a package
+            // Avoid NoClassDefFoundError if the test is in a package
             String testBinaryName = getClassBinaryName(e.getMessage());
             classLoader.changeClassDataName(testName, testBinaryName);
             builder.selectors(selectClass(classLoader.loadClass(testBinaryName)));
@@ -67,7 +67,7 @@ public class TestRunner {
         return unitTestListener.getTestResults();
     }
 
-    // Trick to find binary name with NoClassDefFoundError error msg
+    // Find binary name with NoClassDefFoundError error msg
     private String getClassBinaryName(String errorMsg) {
         int endIndex = errorMsg.indexOf(" ");
         String classBinaryName = errorMsg.substring(0, endIndex);

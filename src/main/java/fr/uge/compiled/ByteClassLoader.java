@@ -10,7 +10,6 @@ public class ByteClassLoader extends ClassLoader {
     public ByteClassLoader(String name, byte[] data) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(data);
-        // Test data
         addClassData(name, data);
     }
 

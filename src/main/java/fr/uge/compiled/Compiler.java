@@ -2,7 +2,7 @@ package fr.uge.compiled;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import javax.tools.Diagnostic;
@@ -25,7 +25,7 @@ public class Compiler {
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         var standardFileManager = javac.getStandardFileManager(diagnostics, null, null);
         var fileManager = new ByteFileManager(standardFileManager);
-        var compilationUnit = standardFileManager.getJavaFileObjectsFromFiles(Arrays.asList(fileToCompile));
+        var compilationUnit = standardFileManager.getJavaFileObjectsFromFiles(Collections.singletonList(fileToCompile));
         JavaCompiler.CompilationTask task = javac.getTask(null, fileManager, diagnostics, null, null, compilationUnit);
 
         try {

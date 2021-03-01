@@ -16,15 +16,26 @@ public class BotUtility {
         return "<@" + event.getAuthor().getId() + ">";
     }
 
-    // Limited to 25 fields. Messages (MessageBuilder) are limited to 2000 characters
     public static void sendEmbedTestResult(MessageReceivedEvent event, List<TestResult> testResults, String testedFile) {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle("Test result for `" + testedFile + "` :robot:");
-        testResults.sort(Comparator.comparing(TestResult::getQuestion).thenComparing(TestResult::getTest));
-        testResults.forEach(testResult ->
-                eb.addField(testResult.toString(), testResultEmote(testResult.getResult()), true));
-        eb.setColor(2438306);
+        testResults.sort(Comparator.comparing(TestResult::getQuestionTagNumber).thenComparing(TestResult::getTest));
+
         eb.setAuthor(event.getAuthor().getAsTag(), null, event.getAuthor().getAvatarUrl());
+        eb.setColor(2438306);
+
+        int counter = 0;
+        // Embed limited to 25 fields
+        for (TestResult testResult : testResults) {
+            if (counter >= 25) {
+                counter = 0;
+                event.getChannel().sendMessage(eb.build()).queue();
+                eb = new EmbedBuilder();
+                eb.setColor(2438306);
+            }
+            eb.addField(testResult.toString(), testResultEmote(testResult.getResult()), true);
+            counter++;
+        }
         event.getChannel().sendMessage(eb.build()).queue();
     }
 

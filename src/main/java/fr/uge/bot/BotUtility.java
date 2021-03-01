@@ -26,14 +26,14 @@ public class BotUtility {
 
         int counter = 0;
         // Embed limited to 25 fields
-        for (int i = 0; i < testResults.size(); i++) {
+        for (TestResult testResult : testResults) {
             if (counter >= 25) {
                 counter = 0;
                 event.getChannel().sendMessage(eb.build()).queue();
                 eb = new EmbedBuilder();
                 eb.setColor(2438306);
             }
-            eb.addField(testResults.get(i).toString(), testResultEmote(testResults.get(i).getResult()), true);
+            eb.addField(testResult.toString(), testResultEmote(testResult.getResult()), true);
             counter++;
         }
         event.getChannel().sendMessage(eb.build()).queue();

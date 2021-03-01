@@ -63,4 +63,12 @@ public class TestResult {
     public String toString() {
         return getQuestion() + ". " + getTest();
     }
+
+    public int getQuestionTagNumber() {
+        try {
+            return Integer.parseInt(question.substring(question.lastIndexOf("Q") + 1));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
 }

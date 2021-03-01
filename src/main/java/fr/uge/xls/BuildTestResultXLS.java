@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class BuildTestResultXLS {
-    // WIP
+    // TODO WIP Mise en forme du XLS
     public byte[] build(List<TestResult> testResults) throws IOException {
         Workbook workbook = new HSSFWorkbook();
         Sheet sheet = workbook.createSheet();

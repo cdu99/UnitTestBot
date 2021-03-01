@@ -119,7 +119,7 @@ public class UnitTestBot {
         BotUtility.sendRedefiningLifetimeMessage(testName, event, newLifetime);
     }
 
-    // WIP
+    // TODO WIP
     public byte[] createTestResultXLS(String testName) throws IOException {
         List<TestResult> testResults = getTestResultsFromDatabase(testName);
         var xlsBuilder = new BuildTestResultXLS();

@@ -12,7 +12,7 @@ public class ResultCommand implements Command {
         this.unitTestBot = unitTestBot;
     }
 
-    // WIP
+    // TODO WIP
     @Override
     public void execute(MessageReceivedEvent event) {
         String testName = event.getMessage().getContentRaw().split(" ", 2)[1];

@@ -17,7 +17,7 @@ public class ResultCommand implements Command {
         String testName = event.getMessage().getContentRaw().split(" ", 2)[1];
         try {
             byte[] xls = unitTestBot.createTestResultXLS(testName);
-            if (xls == null) {
+            if (xls.length == 0) {
                 event.getChannel().sendMessage(":x: No test result found for: **" + testName + "**").queue();
                 return;
             }

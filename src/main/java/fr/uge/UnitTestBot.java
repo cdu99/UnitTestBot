@@ -122,7 +122,7 @@ public class UnitTestBot {
     public byte[] createTestResultXLS(String testName) throws IOException {
         List<TestResult> testResults = getTestResultsFromDatabase(testName);
         if (testResults.isEmpty()) {
-            return null;
+            return new byte[0];
         }
         var xlsBuilder = new BuildTestResultXLS();
         return xlsBuilder.build(testResults);
